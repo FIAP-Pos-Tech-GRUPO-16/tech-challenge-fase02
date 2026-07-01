@@ -33,22 +33,16 @@ Esse sistema permitirá que os clientes escolham restaurantes com base na comida
 
 ## Arquitetura
 
-A aplicação segue uma arquitetura em camadas:
+A partir da Fase 2, a aplicação segue Clean Architecture, com dependências sempre apontando para dentro (infraestrutura → aplicação → domínio):
 
-- controller → entrada HTTP (API REST)
-- service → regras de negócio
-- repository → acesso ao banco de dados
-- model → entidades JPA
-- dto → objetos de transferência
-- mapper → conversão entre DTO e entidade
-- security → autenticação e autorização
-- config → configurações
-- exceptions → tratamento global de erros
+- **domain** → entidades de negócio puras (`Usuario`, `TipoUsuario`, `Endereco`), interfaces de repositório e exceções de domínio. Sem nenhuma dependência de framework.
+- **application** → casos de uso (um por operação de negócio, ex: `CriarUsuarioUseCase`), DTOs de entrada/saída e portas (`CodificadorDeSenha`, `GeradorDeToken`) que a infraestrutura implementa.
+- **infrastructure** → detalhes técnicos: entidades JPA + mappers (MapStruct) + implementações de repositório (`persistence`), controllers REST (`controller`), segurança/JWT (`security`) e configuração (`config`).
 
 Princípios aplicados:
 - SOLID
 - Clean Code
-- Separação de responsabilidades
+- Separação de responsabilidades por camada (Domain / Application / Infrastructure)
 
 ### Diagrama de Arquitetura (Fase 1):
 ![Diagrama de Arquitetura](./img/architectureDiagram.png)
@@ -98,6 +92,13 @@ Migrations SQL em `src/main/resources/db/migration/`:
 - `V1__create_table_user.sql` - Criação da tabela de usuários
 - `V2__alter_users_add_unique_index.sql` - Adição de índices únicos
 - `V3__insert_users.sql` - Inserção de dados iniciais
+- `V4__create_table_tipos_usuario.sql` - Criação da tabela de tipos de usuário
+- `V5__insert_tipos_usuario.sql` - Seed dos tipos "Cliente" e "Dono de Restaurante"
+- `V6__alter_users_add_tipo_usuario_id.sql` - Adição da coluna `tipo_usuario_id` (FK) em `users`
+- `V7__backfill_users_tipo_usuario_id.sql` - Backfill de `tipo_usuario_id` a partir da antiga coluna `type`
+- `V8__finalize_users_tipo_usuario_id.sql` - Torna `tipo_usuario_id` obrigatória e remove a coluna `type`
+
+> A tabela `users` mantém o nome herdado da Fase 1 — apenas os identificadores Java (classes/pacotes/endpoints) foram traduzidos para PT-BR, conforme convenção do grupo.
 
 ### H2 Database (Testes)
 
@@ -121,18 +122,20 @@ A aplicação utiliza Spring Security com autenticação baseada em JWT, garanti
 
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
-| POST | `/v1/auth/login` | Autentica usuário e retorna JWT |
-| PUT | `/v1/auth/users/{id}/password` | Altera senha do usuário |
+| POST | `/v1/autenticacao/login` | Autentica usuário e retorna JWT |
 
 ### Usuários
 
-| Método | Endpoint | Descrição | 
+| Método | Endpoint | Descrição |
 |--------|----------|-----------|
-| GET | `/v1/users/{id}` | Busca usuário por ID |
-| GET | `/v1/users?name={name}&page={page}&size={size}` | Busca usuários por nome (paginado) |
-| POST | `/v1/users` | Cria novo usuário |
-| PATCH | `/v1/users/{id}` | Atualiza dados do usuário |
-| DELETE | `/v1/users/{id}` | Deleta usuário |
+| GET | `/v1/usuarios/{id}` | Busca usuário por ID |
+| GET | `/v1/usuarios?nome={nome}&page={page}&size={size}` | Busca usuários por nome (paginado) |
+| POST | `/v1/usuarios` | Cria novo usuário (recebe `tipoUsuarioId`) |
+| PATCH | `/v1/usuarios/{id}` | Atualiza dados do usuário |
+| PUT | `/v1/usuarios/{id}/senha` | Altera a senha do usuário |
+| DELETE | `/v1/usuarios/{id}` | Remove usuário |
+
+> Tipo de Usuário (CRUD completo de `/v1/tipos-usuario`), Restaurante e Item de Cardápio são adicionados pelos próximos membros do grupo (ver `docs/planejamento-fase2.md`).
 
 ---
 
@@ -247,20 +250,22 @@ mvn test
 ### Executar testes de uma classe específica
 
 ```bash
-mvn test -Dtest=UserControllerTest
+mvn test -Dtest=UsuarioControllerTest
 ```
 
-### Executar testes com cobertura
+### Executar testes com cobertura e aplicar o gate mínimo (80%)
 
 ```bash
-mvn test jacoco:report
+mvn clean verify
 ```
 
+O relatório HTML fica disponível em `target/site/jacoco/index.html`. O build falha (`jacoco:check`) se a cobertura de linhas cair abaixo de 80%.
+
 Testes inclusos:
-- Testes unitários de controllers (Auth, User)
-- Testes de serviço (AuthService, UserService)
-- Testes de segurança (JWT, autenticação)
-- Testes de validação e tratamento de erros
+- Testes unitários dos casos de uso de usuário e autenticação (mock dos repositórios/portas)
+- Testes de segurança (JWT, `UsuarioDetailsServiceImpl`)
+- Testes unitários dos controllers (`UsuarioController`, `AutenticacaoController`)
+- Testes de integração (MockMvc + H2 + Flyway) cobrindo os fluxos principais e erros da API
 
 ---
 
