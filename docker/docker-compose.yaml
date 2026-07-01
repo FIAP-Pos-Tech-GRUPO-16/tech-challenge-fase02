@@ -1,5 +1,7 @@
 version: "3.9"
 
+name: tech-challenge-fase02
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -23,7 +25,8 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    container_name: tech-challenge-fase02-backend
+    image: tech-challenge-fase02
+    container_name: tech-challenge-fase02
     restart: always
     depends_on:
       postgres:
