@@ -4,7 +4,11 @@ Este documento define como o trabalho da Fase 2 será dividido entre os 5 membro
 
 ## Status atual
 
-A etapa do Membro 1 (gabarito de Clean Architecture) **já foi implementada** na branch `feature/clean-architecture-usuario` (ainda não mergeada/aberta como PR). A seção "Membro 1" abaixo foi atualizada com os nomes reais de classes, pacotes, endpoints e migrations efetivamente entregues — os Membros 2 a 5 devem usar essas referências (não as genéricas descritas originalmente).
+- Membro 1 (gabarito de Clean Architecture): **mergeado na `main`** (PR #1).
+- Membro 2 (Tipo de Usuário): **implementado** na branch `feature/tipo-usuario`, ainda não mergeada/aberta como PR.
+- Membros 3, 4 e 5: não iniciados.
+
+As seções abaixo foram atualizadas com os nomes reais de classes, pacotes, endpoints e migrations efetivamente entregues em cada etapa — os próximos membros devem usar essas referências (não as genéricas descritas originalmente).
 
 ## Regra de ouro
 
@@ -58,52 +62,43 @@ infrastructure/
 
 ---
 
-## Membro 2 — Domínio Tipo de Usuário
+## Membro 2 — Domínio Tipo de Usuário — ENTREGUE
 
-**Pré-requisito:** confirmar merge do PR do Membro 1. `TipoUsuario`/tabela `tipos_usuario` já existem (criados pelo Membro 1 para o `Usuario` compilar) — complete o que falta, não recrie do zero. Reaproveite `domain.entity.TipoUsuario`, `domain.repository.TipoUsuarioRepository` e a persistência em `infrastructure.persistence.tipousuario` (`TipoUsuarioJpaEntity`, `TipoUsuarioJpaRepository`, `TipoUsuarioRepositoryImpl`, `TipoUsuarioMapper`) já entregues.
+Branch: `feature/tipo-usuario` (9 commits atômicos, ainda não mergeada/aberta como PR). `mvn clean verify`: **104 testes passando, cobertura de linhas 96,72%**, gate do JaCoCo em 80% passando.
 
-**Branch:** `feature/tipo-usuario`
+### Estrutura real de pacotes
 
-**Estrutura:**
 ```
-domain/entity/TipoUsuario.java
-domain/repository/TipoUsuarioRepository.java
-application/dto/{CriarTipoUsuarioRequest, AtualizarTipoUsuarioRequest, TipoUsuarioResponse, AssociarTipoUsuarioRequest}.java
-application/usecase/{CriarTipoUsuarioUseCase, AtualizarTipoUsuarioUseCase, ExcluirTipoUsuarioUseCase, BuscarTipoUsuarioPorIdUseCase, ListarTiposUsuarioUseCase, AssociarTipoUsuarioAoUsuarioUseCase}.java
-infrastructure/persistence/tipousuario/{TipoUsuarioJpaEntity, TipoUsuarioJpaRepository, TipoUsuarioRepositoryImpl, TipoUsuarioMapper}.java
-infrastructure/controller/TipoUsuarioController.java
+domain/
+  entity/       TipoUsuario (já existia), Usuario ganhou o método associarTipo(UUID)
+  repository/   TipoUsuarioRepository (interface estendida com salvar, existePorNome, excluirPorId, listarPaginado)
+application/
+  dto/                      CriarTipoUsuarioRequest, AtualizarTipoUsuarioRequest, TipoUsuarioResponse, AssociarTipoUsuarioRequest
+  usecase/tipousuario/      CriarTipoUsuarioUseCase, AtualizarTipoUsuarioUseCase, ExcluirTipoUsuarioUseCase,
+                            BuscarTipoUsuarioPorIdUseCase, ListarTiposUsuarioUseCase, TipoUsuarioResponseFactory
+  usecase/usuario/          AssociarTipoUsuarioAoUsuarioUseCase (fica junto de usuario, pois quem é lido/mutado/salvo é o agregado Usuario)
+infrastructure/
+  persistence/tipousuario/  TipoUsuarioJpaRepository e TipoUsuarioRepositoryImpl completados (entidade JPA e mapper já existiam prontos)
+  controller/               TipoUsuarioController (novo); UsuarioController ganhou o endpoint de associação
 ```
 
-**Campos:** `TipoUsuario`: `id` (UUID), `nome` (String, obrigatório, único).
-
-**Endpoints:**
+### Endpoints reais
 
 | Método | Path | Códigos |
 |---|---|---|
 | POST | `/v1/tipos-usuario` | 201, 400, 409 |
-| GET | `/v1/tipos-usuario` | 200 |
+| GET | `/v1/tipos-usuario` | 200 (paginado) |
 | GET | `/v1/tipos-usuario/{id}` | 200, 404 |
 | PUT | `/v1/tipos-usuario/{id}` | 200, 400, 404, 409 |
 | DELETE | `/v1/tipos-usuario/{id}` | 204, 404 |
-| PATCH | `/v1/usuarios/{usuarioId}/tipo-usuario` | 200, 404 |
+| PATCH | `/v1/usuarios/{usuarioId}/tipo-usuario` | 200, 404 (no `UsuarioController`, não no `TipoUsuarioController`) |
 
-Reaproveitar `java.util.NoSuchElementException`/`RecursoJaExistenteException` (pacote `domain.exception`) já existentes (tratadas no `infrastructure.controller.handler.ControllerExceptionHandler`) em vez de criar exceções novas por domínio.
+### Decisões e pontos de atenção para os próximos membros
 
-**Migration:** a última usada pelo Membro 1 foi `V8__finalize_users_tipo_usuario_id.sql` — comece em `V9`, mas confira o último `Vn` real na `main` pós-merge antes de numerar a sua, caso algo tenha mudado.
-
-**Testes:** unitários de cada use case (mock dos repositórios) + `TipoUsuarioControllerIntegrationTest` (H2 + Flyway) cobrindo os 6 endpoints e erros.
-
-**Commits (exemplos):**
-```
-feat: adiciona entidade e repositorio de dominio de tipo de usuario
-feat: cria migration da tabela de tipos de usuario
-feat: adiciona casos de uso de tipo de usuario
-feat: adiciona controller rest de tipo de usuario
-feat: adiciona endpoint de associacao de tipo ao usuario
-test: cobre casos de uso e endpoints de tipo de usuario
-```
-
-Não é necessário atualizar README ou Postman nesta etapa — o README está propositalmente mínimo até a consolidação final (Membro 5), e a collection Postman é recriada do zero por ele ao final.
+- **Nenhuma migration nova foi criada** — o índice único `uk_tipos_usuario_nome` já existia desde `V4__create_table_tipos_usuario.sql`. Última migration continua sendo `V8__finalize_users_tipo_usuario_id.sql`; o Membro 3 começa a numerar a partir de `V9`.
+- Reaproveitadas `java.util.NoSuchElementException`/`RecursoJaExistenteException` (não foram criadas exceções novas por domínio) — sigam o mesmo padrão para Restaurante e Item de Cardápio.
+- Padrão de use case por pacote de agregado (`usecase/<agregado>/`) confirmado como convenção do projeto — Restaurante e Item de Cardápio devem seguir o mesmo layout (`usecase/restaurante/`, `usecase/itemcardapio/`), não um pacote plano.
+- Continua sem atualização de README ou Postman — ambos ficam para o Membro 5.
 
 **PR:** título `feat: adiciona dominio de tipo de usuario`, base `main`, pedir revisão de 1 colega.
 
