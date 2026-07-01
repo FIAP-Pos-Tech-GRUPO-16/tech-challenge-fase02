@@ -11,10 +11,6 @@ import java.util.UUID;
 /**
  * Entidade de domínio que representa o papel de um usuário no sistema
  * (ex: Cliente, Dono de Restaurante).
- *
- * Nesta etapa (Membro 1) só é criado o necessário para que {@link Usuario}
- * consiga referenciar um tipo válido. O CRUD completo de Tipo de Usuário
- * (criar/atualizar/excluir/listar + controller) é escopo do Membro 2.
  */
 @Getter
 @Setter

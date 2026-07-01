@@ -15,9 +15,6 @@ import java.util.UUID;
 
 /**
  * Entidade JPA de Tipo de Usuário. Persiste na tabela {@code tipos_usuario}.
- *
- * Mantida enxuta nesta etapa (Membro 1) — apenas o necessário para
- * {@code Usuario} referenciar um tipo válido. O Membro 2 completa o CRUD.
  */
 @Entity
 @Table(name = "tipos_usuario")
