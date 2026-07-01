@@ -52,7 +52,8 @@ infrastructure/
 - **Exceções de domínio reutilizáveis:** `RecursoJaExistenteException` (409) e `java.util.NoSuchElementException` (404, tratado genericamente) — já mapeadas em `infrastructure/controller/handler/ControllerExceptionHandler`. Não criem uma exceção nova por domínio para esses dois casos.
 - **Endpoints de autenticação:** login em `POST /v1/autenticacao/login` (não `/v1/auth/login`); troca de senha em `PUT /v1/usuarios/{id}/senha`.
 - **JWT:** claims agora são `usuarioId` e `tipoUsuarioId` (strings). Nenhum controle de acesso por tipo de usuário foi implementado — está fora de escopo da Fase 2.
-- **Pendência explícita para o Membro 5:** a collection Postman (`postman/TechChallengeFase02-postman_collection.json`) **não foi atualizada** neste PR — ainda referencia os endpoints/campos antigos (`/v1/users`, enum `type`, etc.). Precisa ser revisada e re-testada via Runner antes da gravação do vídeo.
+- **README simplificado de propósito:** o README completo (arquitetura, modelo de dados, endpoints, diagramas) foi removido para não gerar confusão com referências à Fase 1 durante o desenvolvimento paralelo. Ficou só um resumo mínimo de como rodar o projeto localmente. A documentação completa é consolidada pelo Membro 5 ao final, quando os 4 domínios já estiverem prontos.
+- **Collection Postman removida** (`postman/TechChallengeFase02-postman_collection.json` não existe mais no repositório). Ninguém dos Membros 2, 3 e 4 precisa criar ou manter uma collection própria durante o desenvolvimento — a collection final é criada do zero pelo Membro 5, cobrindo os 4 domínios já integrados.
 - Esta etapa precisa estar mergeada na `main` antes de o Membro 2 começar.
 
 ---
@@ -100,8 +101,9 @@ feat: adiciona casos de uso de tipo de usuario
 feat: adiciona controller rest de tipo de usuario
 feat: adiciona endpoint de associacao de tipo ao usuario
 test: cobre casos de uso e endpoints de tipo de usuario
-docs: documenta endpoints de tipo de usuario no readme e postman
 ```
+
+Não é necessário atualizar README ou Postman nesta etapa — o README está propositalmente mínimo até a consolidação final (Membro 5), e a collection Postman é recriada do zero por ele ao final.
 
 **PR:** título `feat: adiciona dominio de tipo de usuario`, base `main`, pedir revisão de 1 colega.
 
@@ -148,8 +150,9 @@ feat: cria migration da tabela de restaurantes
 feat: adiciona casos de uso de restaurante
 feat: adiciona controller rest de restaurante
 test: cobre casos de uso e endpoints de restaurante
-docs: documenta endpoints de restaurante no readme e postman
 ```
+
+Não é necessário atualizar README ou Postman nesta etapa — fica a cargo do Membro 5 na consolidação final.
 
 **PR:** título `feat: adiciona dominio de restaurante`.
 
@@ -194,8 +197,9 @@ feat: cria migration da tabela de itens de cardapio
 feat: adiciona casos de uso de item de cardapio
 feat: adiciona controller rest de item de cardapio
 test: cobre casos de uso e endpoints de item de cardapio
-docs: documenta endpoints de item de cardapio no readme e postman
 ```
+
+Não é necessário atualizar README ou Postman nesta etapa — fica a cargo do Membro 5 na consolidação final.
 
 **PR:** título `feat: adiciona dominio de item de cardapio`.
 
@@ -212,8 +216,8 @@ docs: documenta endpoints de item de cardapio no readme e postman
 - **Cobertura:** rodar `mvn clean verify`, abrir `target/site/jacoco/index.html`, escrever os testes que faltarem para bater 80% total (inclusive em código de outros membros, se necessário).
 - **Teste ponta a ponta:** criar `FluxoCompletoIntegrationTest` cobrindo criar usuário → criar tipo → associar → criar restaurante → criar item de cardápio → listar.
 - **Docker Compose:** subir `docker compose up --build`, validar que Flyway roda com as 4 tabelas e a API responde.
-- **README:** consolidar arquitetura Clean Architecture, modelo de dados final (4 tabelas), tabela de endpoints completa (Auth + Usuários + Tipos de Usuário + Restaurantes + Itens de Cardápio), seção de grupo.
-- **Postman:** revisar as 4 pastas, rodar a collection inteira via Runner na ordem lógica do fluxo, corrigir o que quebrar.
+- **README:** o README está propositalmente mínimo desde o início da Fase 2 (só instruções de execução) — escrever do zero as seções de arquitetura Clean Architecture, modelo de dados final (4 tabelas), tabela de endpoints completa (Auth + Usuários + Tipos de Usuário + Restaurantes + Itens de Cardápio) e seção de grupo.
+- **Postman:** a collection foi removida no início da Fase 2 — criar uma nova collection do zero (`postman/TechChallengeFase02-postman_collection.json`) cobrindo os 4 domínios, com uma pasta por domínio, variáveis de ambiente (`baseUrl`, `token`) e rodar via Runner na ordem lógica do fluxo antes de considerar pronta.
 - **Apoio ao vídeo (~5min):** roteiro sugerido — contexto (30s) → arquitetura em camadas (30s) → demo Postman do fluxo completo (2-3min) → Swagger UI (30s) → `mvn clean verify` com testes verdes e cobertura ≥80% (30s) → encerramento.
 
 **Commits:**
