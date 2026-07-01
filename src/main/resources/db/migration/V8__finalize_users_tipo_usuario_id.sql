@@ -1,0 +1,2 @@
+ALTER TABLE users ALTER COLUMN tipo_usuario_id SET NOT NULL;
+ALTER TABLE users DROP COLUMN type;
