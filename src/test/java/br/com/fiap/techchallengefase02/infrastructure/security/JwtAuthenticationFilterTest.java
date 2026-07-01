@@ -1,4 +1,4 @@
-package br.com.fiap.techchallengefase02.security;
+package br.com.fiap.techchallengefase02.infrastructure.security;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,9 +47,9 @@ class JwtAuthenticationFilterTest {
     }
 
     @Nested
-    class WithoutTokenTests {
+    class SemToken {
         @Test
-        void shouldContinueFilterChainWhenNoAuthorizationHeader() throws Exception {
+        void deveContinuarFiltroQuandoNaoHaCabecalhoDeAutorizacao() throws Exception {
             filter.doFilter(request, response, filterChain);
 
             assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
@@ -57,7 +57,7 @@ class JwtAuthenticationFilterTest {
         }
 
         @Test
-        void shouldContinueFilterChainWhenAuthorizationHeaderIsNotBearer() throws Exception {
+        void deveContinuarFiltroQuandoCabecalhoNaoEhBearer() throws Exception {
             request.addHeader("Authorization", "Basic dXNlcjpwYXNz");
 
             filter.doFilter(request, response, filterChain);
@@ -68,9 +68,9 @@ class JwtAuthenticationFilterTest {
     }
 
     @Nested
-    class WithInvalidTokenTests {
+    class ComTokenInvalido {
         @Test
-        void shouldNotSetAuthenticationWhenTokenIsInvalid() throws Exception {
+        void naoDeveAutenticarQuandoTokenInvalido() throws Exception {
             request.addHeader("Authorization", "Bearer token-invalido");
             when(jwtService.isTokenValid("token-invalido")).thenReturn(false);
 
@@ -82,9 +82,9 @@ class JwtAuthenticationFilterTest {
     }
 
     @Nested
-    class WithValidTokenTests {
+    class ComTokenValido {
         @Test
-        void shouldSetAuthenticationWhenTokenIsValid() throws Exception {
+        void deveAutenticarQuandoTokenValido() throws Exception {
             request.addHeader("Authorization", "Bearer token-valido");
             when(jwtService.isTokenValid("token-valido")).thenReturn(true);
             when(jwtService.extractLogin("token-valido")).thenReturn("joao123");
@@ -98,11 +98,11 @@ class JwtAuthenticationFilterTest {
         }
 
         @Test
-        void shouldNotReplaceExistingAuthentication() throws Exception {
-            UsernamePasswordAuthenticationToken existingAuth = new UsernamePasswordAuthenticationToken(
+        void naoDeveSubstituirAutenticacaoExistente() throws Exception {
+            UsernamePasswordAuthenticationToken existente = new UsernamePasswordAuthenticationToken(
                     "usuario-existente", null, Collections.emptyList()
             );
-            SecurityContextHolder.getContext().setAuthentication(existingAuth);
+            SecurityContextHolder.getContext().setAuthentication(existente);
 
             request.addHeader("Authorization", "Bearer token-valido");
             when(jwtService.isTokenValid("token-valido")).thenReturn(true);

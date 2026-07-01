@@ -1,7 +1,6 @@
-package br.com.fiap.techchallengefase02.config;
+package br.com.fiap.techchallengefase02.infrastructure.config;
 
-
-import br.com.fiap.techchallengefase02.security.JwtService;
+import br.com.fiap.techchallengefase02.infrastructure.security.JwtService;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 

@@ -1,13 +1,17 @@
-package br.com.fiap.techchallengefase02.controller;
+package br.com.fiap.techchallengefase02.infrastructure.controller.handler;
 
-import br.com.fiap.techchallengefase02.dto.request.UserRequestDTO;
-import br.com.fiap.techchallengefase02.exceptions.InvalidCredentialsException;
-import br.com.fiap.techchallengefase02.exceptions.ResourceAlreadyExistsException;
+import br.com.fiap.techchallengefase02.application.dto.CriarUsuarioRequest;
+import br.com.fiap.techchallengefase02.domain.exception.CredenciaisInvalidasException;
+import br.com.fiap.techchallengefase02.domain.exception.RecursoJaExistenteException;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.NoSuchElementException;
 
+/**
+ * Controller usado apenas em teste para exercitar o {@link ControllerExceptionHandler}
+ * sem depender de um domínio real.
+ */
 @RestController
 @RequestMapping("/test/exceptions")
 public class TestExceptionController {
@@ -24,12 +28,12 @@ public class TestExceptionController {
 
     @GetMapping("/conflict")
     public void conflict() {
-        throw new ResourceAlreadyExistsException("Recurso já existe");
+        throw new RecursoJaExistenteException("Recurso já existe");
     }
 
     @GetMapping("/unauthorized")
     public void unauthorized() {
-        throw new InvalidCredentialsException("Não autorizado");
+        throw new CredenciaisInvalidasException("Não autorizado");
     }
 
     @GetMapping("/generic")
@@ -38,7 +42,7 @@ public class TestExceptionController {
     }
 
     @PostMapping("/validate")
-    public void validate(@RequestBody @Valid UserRequestDTO dto) {
+    public void validate(@RequestBody @Valid CriarUsuarioRequest dto) {
         // apenas para disparar validação
     }
 }

@@ -1,7 +1,6 @@
-package br.com.fiap.techchallengefase02.exceptions.handlers;
+package br.com.fiap.techchallengefase02.infrastructure.controller.handler;
 
-import br.com.fiap.techchallengefase02.config.TestSecurityConfig;
-import br.com.fiap.techchallengefase02.controller.TestExceptionController;
+import br.com.fiap.techchallengefase02.infrastructure.config.TestSecurityConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -25,7 +24,7 @@ class ControllerExceptionHandlerTest {
     private MockMvc mockMvc;
 
     @Test
-    void shouldReturn404WhenNoSuchElementException() throws Exception {
+    void deveRetornar404QuandoNoSuchElementException() throws Exception {
         mockMvc.perform(get("/test/exceptions/not-found"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Recurso não encontrado"))
@@ -34,7 +33,7 @@ class ControllerExceptionHandlerTest {
     }
 
     @Test
-    void shouldReturn400WhenIllegalArgumentException() throws Exception {
+    void deveRetornar400QuandoIllegalArgumentException() throws Exception {
         mockMvc.perform(get("/test/exceptions/illegal"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Requisição inválida"))
@@ -42,38 +41,38 @@ class ControllerExceptionHandlerTest {
     }
 
     @Test
-    void shouldReturn409WhenResourceAlreadyExists() throws Exception {
+    void deveRetornar409QuandoRecursoJaExistenteException() throws Exception {
         mockMvc.perform(get("/test/exceptions/conflict"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.title").value("Recurso já existe"));
     }
 
     @Test
-    void shouldReturn401WhenInvalidCredentials() throws Exception {
+    void deveRetornar401QuandoCredenciaisInvalidasException() throws Exception {
         mockMvc.perform(get("/test/exceptions/unauthorized"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.title").value("Não autorizado"));
     }
 
     @Test
-    void shouldReturn500WhenUnexpectedException() throws Exception {
+    void deveRetornar500QuandoExcecaoInesperada() throws Exception {
         mockMvc.perform(get("/test/exceptions/generic"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.title").value("Erro interno do servidor"));
     }
 
     @Test
-    void shouldReturnValidationError() throws Exception {
+    void deveRetornarErroDeValidacao() throws Exception {
         mockMvc.perform(post("/test/exceptions/validate")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "name": "",
+                                  "nome": "",
                                   "email": "joao@gmail.com"
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[?(@.field == 'name')].message").value(hasItem("Nome é obrigatório")))
+                .andExpect(jsonPath("$.errors[?(@.field == 'nome')].message").value(hasItem("Nome é obrigatório")))
                 .andExpect(jsonPath("$.title").value("Erro de validação"))
                 .andExpect(jsonPath("$.errors").isArray());
     }

@@ -1,13 +1,11 @@
-package br.com.fiap.techchallengefase02.security;
+package br.com.fiap.techchallengefase02.infrastructure.security;
 
-import br.com.fiap.techchallengefase02.model.Address;
-import br.com.fiap.techchallengefase02.model.Customer;
+import br.com.fiap.techchallengefase02.domain.entity.Usuario;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,66 +24,65 @@ class JwtServiceTest {
         ReflectionTestUtils.setField(jwtService, "expirationMs", 86400000L);
     }
 
-    private Customer buildUser() {
-        return Customer.builder()
+    private Usuario buildUsuario() {
+        return Usuario.builder()
                 .id(UUID.randomUUID())
-                .name("João Silva")
+                .nome("João Silva")
                 .email("joao@email.com")
                 .login("joao123")
-                .password("hashed-password")
-                .address(new Address("Rua das Flores", "123", "São Paulo", "01310100"))
-                .lastUpdatedAt(LocalDateTime.now())
+                .senha("hashed-password")
+                .tipoUsuarioId(UUID.randomUUID())
                 .build();
     }
 
     @Nested
-    class GenerateTokenTests {
+    class GerarTokenTests {
         @Test
-        void shouldGenerateNonNullToken() {
-            String token = jwtService.generateToken(buildUser());
+        void deveGerarTokenNaoNulo() {
+            String token = jwtService.gerar(buildUsuario());
             assertThat(token).isNotNull().isNotBlank();
         }
 
         @Test
-        void shouldGenerateTokenWithThreeParts() {
-            String token = jwtService.generateToken(buildUser());
+        void deveGerarTokenComTresPartes() {
+            String token = jwtService.gerar(buildUsuario());
             assertThat(token.split("\\.")).hasSize(3);
         }
     }
 
     @Nested
-    class ExtractLoginTests {
+    class ExtrairLoginTests {
         @Test
-        void shouldExtractLoginFromToken() {
-            Customer user = buildUser();
-            String token = jwtService.generateToken(user);
+        void deveExtrairLoginDoToken() {
+            Usuario usuario = buildUsuario();
+            String token = jwtService.gerar(usuario);
 
             assertThat(jwtService.extractLogin(token)).isEqualTo("joao123");
         }
     }
 
     @Nested
-    class ValidateTokenTests {
+    class ValidarTokenTests {
         @Test
-        void shouldReturnTrueForValidToken() {
-            String token = jwtService.generateToken(buildUser());
+        void deveRetornarTrueParaTokenValido() {
+            String token = jwtService.gerar(buildUsuario());
             assertThat(jwtService.isTokenValid(token)).isTrue();
         }
 
         @Test
-        void shouldReturnFalseForTamperedToken() {
+        void deveRetornarFalseParaTokenAdulterado() {
             assertThat(jwtService.isTokenValid("token.invalido.aqui")).isFalse();
         }
 
         @Test
-        void shouldReturnFalseForBlankToken() {
+        void deveRetornarFalseParaTokenEmBranco() {
             assertThat(jwtService.isTokenValid("")).isFalse();
         }
 
         @Test
-        void shouldReturnFalseForExpiredToken() {
+        void deveRetornarFalseParaTokenExpirado() {
             ReflectionTestUtils.setField(jwtService, "expirationMs", -1000L);
-            String token = jwtService.generateToken(buildUser());
+            String token = jwtService.gerar(buildUsuario());
             assertThat(jwtService.isTokenValid(token)).isFalse();
         }
     }
