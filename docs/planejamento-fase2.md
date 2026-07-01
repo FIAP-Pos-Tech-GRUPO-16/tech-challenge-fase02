@@ -2,9 +2,9 @@
 
 Este documento define como o trabalho da Fase 2 será dividido entre os 5 membros do grupo, em fila sequencial (um membro só começa depois que o PR do anterior for mergeado na `main`), para minimizar conflitos de merge.
 
-## Ponto de atenção
+## Status atual
 
-O CLAUDE.md exige nomes de classes/pacotes/endpoints em Português-BR, mas o código atual da Fase 1 está em inglês (`User`, `UserController`, `/v1/users`). Este roteiro assume que o refactor do Membro 1 vai renomear tudo para PT-BR (`Usuario`, `UsuarioController`, `/v1/usuarios`). Se isso não acontecer, os membros 2 a 5 precisam ajustar as referências de nome abaixo para bater com o que foi efetivamente entregue.
+A etapa do Membro 1 (gabarito de Clean Architecture) **já foi implementada** na branch `feature/clean-architecture-usuario` (ainda não mergeada/aberta como PR). A seção "Membro 1" abaixo foi atualizada com os nomes reais de classes, pacotes, endpoints e migrations efetivamente entregues — os Membros 2 a 5 devem usar essas referências (não as genéricas descritas originalmente).
 
 ## Regra de ouro
 
@@ -12,23 +12,54 @@ Fila sequencial, um de cada vez. Ninguém cria branch antes do PR anterior estar
 
 ---
 
-## Membro 1 — Rodrigo Cavalcante de Barros (setup e gabarito)
+## Membro 1 — Rodrigo Cavalcante de Barros (setup e gabarito) — ENTREGUE
 
-Responsável pela etapa inicial, que define o padrão que todos os demais devem seguir:
+Branch: `feature/clean-architecture-usuario` (9 commits atômicos, `mvn clean verify` com 72 testes passando e cobertura de linhas 93,11%, gate do JaCoCo em 80% configurado e passando).
 
-- Criação/estruturação do repositório.
-- Refactor da Fase 1 para Clean Architecture (`domain` / `application` / `infrastructure`).
-- Configuração base do projeto e adição de dependências novas necessárias.
-- Configuração do JaCoCo (gate de cobertura mínima de 80%).
-- Remodelagem de Usuário/Tipo de Usuário: sai da herança JPA (`Customer`/`RestaurantOwner`) e vai para composição com tabela própria (`TipoUsuario` associado por FK).
+### Estrutura real de pacotes
 
-Esta etapa precisa estar mergeada na `main` antes de o Membro 2 começar.
+```
+domain/
+  entity/       Usuario, TipoUsuario, Endereco
+  repository/   UsuarioRepository, TipoUsuarioRepository, ResultadoPaginado<T>
+  exception/    RegraDeNegocioException, RecursoJaExistenteException, CredenciaisInvalidasException
+application/
+  usecase/usuario/       CriarUsuarioUseCase, AtualizarUsuarioUseCase, BuscarUsuarioPorIdUseCase,
+                         BuscarUsuariosPorNomeUseCase, ExcluirUsuarioUseCase, UsuarioResponseFactory
+  usecase/autenticacao/  AutenticarUsuarioUseCase, AlterarSenhaUseCase
+  dto/          CriarUsuarioRequest, AtualizarUsuarioRequest, UsuarioResponse, EnderecoDTO,
+                LoginRequest, TokenResponse, AlterarSenhaRequest, Pagina<T>
+  port/         CodificadorDeSenha, GeradorDeToken (interfaces que isolam a Application de BCrypt/JJWT)
+infrastructure/
+  persistence/usuario/      UsuarioJpaEntity, EnderecoJpaEmbeddable, UsuarioJpaRepository,
+                             UsuarioRepositoryImpl, UsuarioMapper
+  persistence/tipousuario/  TipoUsuarioJpaEntity, TipoUsuarioJpaRepository, TipoUsuarioRepositoryImpl,
+                             TipoUsuarioMapper  (apenas o necessário para Usuario funcionar — CRUD completo é do Membro 2)
+  controller/    UsuarioController, AutenticacaoController, controller/handler/ControllerExceptionHandler,
+                 controller/response/{ApiSuccessResponse, Meta, ValidationError}
+  security/      JwtService (implements GeradorDeToken), JwtAuthenticationFilter, JwtAuthenticationEntryPoint,
+                 UsuarioDetailsServiceImpl (implements UserDetailsService), CodificadorDeSenhaBCrypt (implements CodificadorDeSenha)
+  config/        SecurityConfig, PasswordConfig, OpenApiConfig
+```
+
+### Decisões e pontos de atenção para os próximos membros
+
+- **Tabela `users` mantém o nome em inglês no banco** (só as classes Java e endpoints mudaram para PT-BR) — ao criar FK de `donoId`/`restaurante` para usuário, referencie `users(id)`.
+- **`TipoUsuario`**: já existe `domain.entity.TipoUsuario`, `domain.repository.TipoUsuarioRepository` (com `buscarPorId`/`existePorId`) e a persistência mínima em `infrastructure.persistence.tipousuario`. O Membro 2 **completa** isso (CRUD completo + controller), não recria do zero.
+- **Tipos seedados** (migration `V5__insert_tipos_usuario.sql`) com UUIDs fixos e previsíveis: `11111111-1111-1111-1111-111111111111` = "Cliente", `22222222-2222-2222-2222-222222222222` = "Dono de Restaurante".
+- **Última migration usada:** `V8__finalize_users_tipo_usuario_id.sql`. O Membro 2 deve começar a numerar a partir de `V9`.
+- **`Usuario.tipoUsuarioId`** é uma referência simples por UUID (sem navegação de objeto entre agregados) — mesmo padrão que Restaurante deve usar para `donoId` (Membro 3) e Item de Cardápio para `restauranteId` (Membro 4).
+- **Exceções de domínio reutilizáveis:** `RecursoJaExistenteException` (409) e `java.util.NoSuchElementException` (404, tratado genericamente) — já mapeadas em `infrastructure/controller/handler/ControllerExceptionHandler`. Não criem uma exceção nova por domínio para esses dois casos.
+- **Endpoints de autenticação:** login em `POST /v1/autenticacao/login` (não `/v1/auth/login`); troca de senha em `PUT /v1/usuarios/{id}/senha`.
+- **JWT:** claims agora são `usuarioId` e `tipoUsuarioId` (strings). Nenhum controle de acesso por tipo de usuário foi implementado — está fora de escopo da Fase 2.
+- **Pendência explícita para o Membro 5:** a collection Postman (`postman/TechChallengeFase02-postman_collection.json`) **não foi atualizada** neste PR — ainda referencia os endpoints/campos antigos (`/v1/users`, enum `type`, etc.). Precisa ser revisada e re-testada via Runner antes da gravação do vídeo.
+- Esta etapa precisa estar mergeada na `main` antes de o Membro 2 começar.
 
 ---
 
 ## Membro 2 — Domínio Tipo de Usuário
 
-**Pré-requisito:** confirmar merge do PR do Membro 1. Verificar se já existe `TipoUsuario`/tabela `tipos_usuario` básica (criada pelo Membro 1 para o `Usuario` compilar) — se sim, completar; se não, criar do zero.
+**Pré-requisito:** confirmar merge do PR do Membro 1. `TipoUsuario`/tabela `tipos_usuario` já existem (criados pelo Membro 1 para o `Usuario` compilar) — complete o que falta, não recrie do zero. Reaproveite `domain.entity.TipoUsuario`, `domain.repository.TipoUsuarioRepository` e a persistência em `infrastructure.persistence.tipousuario` (`TipoUsuarioJpaEntity`, `TipoUsuarioJpaRepository`, `TipoUsuarioRepositoryImpl`, `TipoUsuarioMapper`) já entregues.
 
 **Branch:** `feature/tipo-usuario`
 
@@ -55,9 +86,9 @@ infrastructure/controller/TipoUsuarioController.java
 | DELETE | `/v1/tipos-usuario/{id}` | 204, 404 |
 | PATCH | `/v1/usuarios/{usuarioId}/tipo-usuario` | 200, 404 |
 
-Reaproveitar `NoSuchElementException`/`ResourceAlreadyExistsException` já existentes (tratadas no `ControllerExceptionHandler`) em vez de criar exceções novas por domínio.
+Reaproveitar `java.util.NoSuchElementException`/`RecursoJaExistenteException` (pacote `domain.exception`) já existentes (tratadas no `infrastructure.controller.handler.ControllerExceptionHandler`) em vez de criar exceções novas por domínio.
 
-**Migration:** conferir último `Vn` real na `main` pós-merge antes de numerar a sua.
+**Migration:** a última usada pelo Membro 1 foi `V8__finalize_users_tipo_usuario_id.sql` — comece em `V9`, mas confira o último `Vn` real na `main` pós-merge antes de numerar a sua, caso algo tenha mudado.
 
 **Testes:** unitários de cada use case (mock dos repositórios) + `TipoUsuarioControllerIntegrationTest` (H2 + Flyway) cobrindo os 6 endpoints e erros.
 
@@ -78,7 +109,7 @@ docs: documenta endpoints de tipo de usuario no readme e postman
 
 ## Membro 3 — Domínio Restaurante
 
-**Pré-requisito:** confirmar merge do Membro 2. Confirmar nome real da tabela/entidade de Usuário para a FK do dono.
+**Pré-requisito:** confirmar merge do Membro 2. A tabela de usuário no banco chama-se `users` (o Membro 1 manteve o nome original em inglês na tabela, só as classes Java e endpoints viraram PT-BR) — use `REFERENCES users(id)` na FK do dono.
 
 **Branch:** `feature/restaurante`
 
@@ -106,7 +137,7 @@ Não validar que o tipo do usuário seja "Dono de Restaurante" — fora do escop
 | PUT | `/v1/restaurantes/{id}` | 200, 400, 404 |
 | DELETE | `/v1/restaurantes/{id}` | 204, 404 |
 
-**Migration:** `V{n+1}__create_table_restaurantes.sql` com FK `dono_id UUID NOT NULL REFERENCES <tabela_usuario>(id)`.
+**Migration:** `V{n+1}__create_table_restaurantes.sql` com FK `dono_id UUID NOT NULL REFERENCES users(id)`.
 
 **Testes:** unitários (incluindo caso "dono não existe") + `RestauranteControllerIntegrationTest`.
 
