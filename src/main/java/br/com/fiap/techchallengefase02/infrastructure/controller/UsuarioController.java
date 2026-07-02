@@ -1,11 +1,13 @@
 package br.com.fiap.techchallengefase02.infrastructure.controller;
 
 import br.com.fiap.techchallengefase02.application.dto.AlterarSenhaRequest;
+import br.com.fiap.techchallengefase02.application.dto.AssociarTipoUsuarioRequest;
 import br.com.fiap.techchallengefase02.application.dto.AtualizarUsuarioRequest;
 import br.com.fiap.techchallengefase02.application.dto.CriarUsuarioRequest;
 import br.com.fiap.techchallengefase02.application.dto.Pagina;
 import br.com.fiap.techchallengefase02.application.dto.UsuarioResponse;
 import br.com.fiap.techchallengefase02.application.usecase.autenticacao.AlterarSenhaUseCase;
+import br.com.fiap.techchallengefase02.application.usecase.usuario.AssociarTipoUsuarioAoUsuarioUseCase;
 import br.com.fiap.techchallengefase02.application.usecase.usuario.AtualizarUsuarioUseCase;
 import br.com.fiap.techchallengefase02.application.usecase.usuario.BuscarUsuarioPorIdUseCase;
 import br.com.fiap.techchallengefase02.application.usecase.usuario.BuscarUsuariosPorNomeUseCase;
@@ -41,19 +43,22 @@ public class UsuarioController {
     private final BuscarUsuariosPorNomeUseCase buscarUsuariosPorNomeUseCase;
     private final ExcluirUsuarioUseCase excluirUsuarioUseCase;
     private final AlterarSenhaUseCase alterarSenhaUseCase;
+    private final AssociarTipoUsuarioAoUsuarioUseCase associarTipoUsuarioAoUsuarioUseCase;
 
     public UsuarioController(CriarUsuarioUseCase criarUsuarioUseCase,
                               AtualizarUsuarioUseCase atualizarUsuarioUseCase,
                               BuscarUsuarioPorIdUseCase buscarUsuarioPorIdUseCase,
                               BuscarUsuariosPorNomeUseCase buscarUsuariosPorNomeUseCase,
                               ExcluirUsuarioUseCase excluirUsuarioUseCase,
-                              AlterarSenhaUseCase alterarSenhaUseCase) {
+                              AlterarSenhaUseCase alterarSenhaUseCase,
+                              AssociarTipoUsuarioAoUsuarioUseCase associarTipoUsuarioAoUsuarioUseCase) {
         this.criarUsuarioUseCase = criarUsuarioUseCase;
         this.atualizarUsuarioUseCase = atualizarUsuarioUseCase;
         this.buscarUsuarioPorIdUseCase = buscarUsuarioPorIdUseCase;
         this.buscarUsuariosPorNomeUseCase = buscarUsuariosPorNomeUseCase;
         this.excluirUsuarioUseCase = excluirUsuarioUseCase;
         this.alterarSenhaUseCase = alterarSenhaUseCase;
+        this.associarTipoUsuarioAoUsuarioUseCase = associarTipoUsuarioAoUsuarioUseCase;
     }
 
     @GetMapping("/{id}")
@@ -140,5 +145,18 @@ public class UsuarioController {
     public ResponseEntity<Void> excluir(@PathVariable UUID id) {
         excluirUsuarioUseCase.executar(id);
         return ApiSuccessResponse.noContent();
+    }
+
+    @PatchMapping("/{usuarioId}/tipo-usuario")
+    @Operation(summary = "Associar tipo de usuário", description = "Associa um tipo de usuário existente a um usuário já cadastrado")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Tipo de usuário associado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Usuário ou tipo de usuário não encontrado",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<ApiSuccessResponse<UsuarioResponse>> associarTipoUsuario(@PathVariable UUID usuarioId,
+                                                                                    @RequestBody @Valid AssociarTipoUsuarioRequest request) {
+        UsuarioResponse response = associarTipoUsuarioAoUsuarioUseCase.executar(usuarioId, request.tipoUsuarioId());
+        return ApiSuccessResponse.ok(response);
     }
 }

@@ -6,17 +6,20 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Contrato de persistência de {@link TipoUsuario}.
- *
- * Nesta etapa (Membro 1) só existem as operações necessárias para que a
- * criação de {@code Usuario} consiga validar um {@code tipoUsuarioId}
- * informado. O CRUD completo de Tipo de Usuário é escopo do Membro 2, que
- * deve estender esta interface conforme necessário (ex: salvar, listar,
- * excluir).
+ * Contrato de persistência de {@link TipoUsuario}. A implementação concreta
+ * (JPA) vive em {@code infrastructure.persistence.tipousuario}.
  */
 public interface TipoUsuarioRepository {
 
     Optional<TipoUsuario> buscarPorId(UUID id);
 
     boolean existePorId(UUID id);
+
+    boolean existePorNome(String nome);
+
+    TipoUsuario salvar(TipoUsuario tipoUsuario);
+
+    void excluirPorId(UUID id);
+
+    ResultadoPaginado<TipoUsuario> listarPaginado(int pagina, int tamanho);
 }

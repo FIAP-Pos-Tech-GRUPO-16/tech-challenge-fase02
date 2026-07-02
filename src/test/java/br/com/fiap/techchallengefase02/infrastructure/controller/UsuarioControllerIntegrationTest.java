@@ -27,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UsuarioControllerIntegrationTest {
 
     private static final UUID TIPO_USUARIO_CLIENTE_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
+    private static final UUID TIPO_USUARIO_DONO_ID = UUID.fromString("22222222-2222-2222-2222-222222222222");
 
     @Autowired
     private MockMvc mockMvc;
@@ -320,6 +321,72 @@ class UsuarioControllerIntegrationTest {
             mockMvc.perform(delete("/v1/usuarios/{id}", UUID.randomUUID())
                             .header("Authorization", tokenValido()))
                     .andExpect(status().isNotFound());
+        }
+    }
+
+    @Nested
+    class AssociarTipoUsuario {
+
+        @Test
+        void deveAssociarTipoUsuarioComSucesso() throws Exception {
+            String corpoResposta = mockMvc.perform(post("/v1/usuarios")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(jsonCriarUsuario(emailUnico(), loginUnico())))
+                    .andReturn().getResponse().getContentAsString();
+
+            String id = objectMapper.readTree(corpoResposta).get("data").get("id").asText();
+
+            String corpoAssociacao = """
+                    {
+                      "tipoUsuarioId": "%s"
+                    }
+                    """.formatted(TIPO_USUARIO_DONO_ID);
+
+            mockMvc.perform(patch("/v1/usuarios/{id}/tipo-usuario", id)
+                            .header("Authorization", tokenValido())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(corpoAssociacao))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.tipoUsuarioId").value(TIPO_USUARIO_DONO_ID.toString()));
+        }
+
+        @Test
+        void deveRetornar404QuandoUsuarioNaoEncontrado() throws Exception {
+            String corpoAssociacao = """
+                    {
+                      "tipoUsuarioId": "%s"
+                    }
+                    """.formatted(TIPO_USUARIO_DONO_ID);
+
+            mockMvc.perform(patch("/v1/usuarios/{id}/tipo-usuario", UUID.randomUUID())
+                            .header("Authorization", tokenValido())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(corpoAssociacao))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.title").value("Recurso não encontrado"));
+        }
+
+        @Test
+        void deveRetornar404QuandoTipoUsuarioNaoEncontrado() throws Exception {
+            String corpoResposta = mockMvc.perform(post("/v1/usuarios")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(jsonCriarUsuario(emailUnico(), loginUnico())))
+                    .andReturn().getResponse().getContentAsString();
+
+            String id = objectMapper.readTree(corpoResposta).get("data").get("id").asText();
+
+            String corpoAssociacao = """
+                    {
+                      "tipoUsuarioId": "%s"
+                    }
+                    """.formatted(UUID.randomUUID());
+
+            mockMvc.perform(patch("/v1/usuarios/{id}/tipo-usuario", id)
+                            .header("Authorization", tokenValido())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(corpoAssociacao))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.title").value("Recurso não encontrado"));
         }
     }
 }

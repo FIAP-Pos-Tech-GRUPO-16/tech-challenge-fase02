@@ -43,4 +43,13 @@ public class Usuario {
     public void marcarComoAlterado() {
         this.dataUltimaAlteracao = LocalDateTime.now();
     }
+
+    /**
+     * Associa este usuário a um tipo de usuário existente (ex: Cliente,
+     * Dono de Restaurante). Método específico em vez do setter genérico,
+     * para deixar explícita a intenção de negócio de quem chama.
+     */
+    public void associarTipo(UUID tipoUsuarioId) {
+        this.tipoUsuarioId = tipoUsuarioId;
+    }
 }

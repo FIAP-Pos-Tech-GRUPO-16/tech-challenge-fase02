@@ -1,10 +1,11 @@
 # Planejamento da Fase 2 — Divisão de Trabalho do Grupo
 
-Este documento define como o trabalho da Fase 2 será dividido entre os 5 membros do grupo, em fila sequencial (um membro só começa depois que o PR do anterior for mergeado na `main`), para minimizar conflitos de merge.
-
 ## Status atual
 
-A etapa do Membro 1 (gabarito de Clean Architecture) **já foi implementada** na branch `feature/clean-architecture-usuario` (ainda não mergeada/aberta como PR). A seção "Membro 1" abaixo foi atualizada com os nomes reais de classes, pacotes, endpoints e migrations efetivamente entregues — os Membros 2 a 5 devem usar essas referências (não as genéricas descritas originalmente).
+✅ Setup inicial, Refatoração para Clean Architecture, Configuração de Jacoco, Reescrita de testes Unitários, Ajsutes de Docker. 
+✅ Domínio de Tipo de Usuário completo, CRUD completo
+
+As seções abaixo foram atualizadas com os nomes reais de classes, pacotes, endpoints e migrations efetivamente entregues em cada etapa. Os membros do grupo devem usar essas referências.
 
 ## Regra de ouro
 
@@ -12,7 +13,7 @@ Fila sequencial, um de cada vez. Ninguém cria branch antes do PR anterior estar
 
 ---
 
-## Membro 1 — Rodrigo Cavalcante de Barros (setup e gabarito) — ENTREGUE
+## 1. Setup Inicial — Rodrigo Cavalcante de Barros: ✅ ENTREGUE
 
 Branch: `feature/clean-architecture-usuario` (9 commits atômicos, `mvn clean verify` com 72 testes passando e cobertura de linhas 93,11%, gate do JaCoCo em 80% configurado e passando).
 
@@ -58,58 +59,49 @@ infrastructure/
 
 ---
 
-## Membro 2 — Domínio Tipo de Usuário
+## 2. Domínio Tipo de Usuário — Rodrigo Cavalcante de Barros: ✅ ENTREGUE
 
-**Pré-requisito:** confirmar merge do PR do Membro 1. `TipoUsuario`/tabela `tipos_usuario` já existem (criados pelo Membro 1 para o `Usuario` compilar) — complete o que falta, não recrie do zero. Reaproveite `domain.entity.TipoUsuario`, `domain.repository.TipoUsuarioRepository` e a persistência em `infrastructure.persistence.tipousuario` (`TipoUsuarioJpaEntity`, `TipoUsuarioJpaRepository`, `TipoUsuarioRepositoryImpl`, `TipoUsuarioMapper`) já entregues.
+Branch: `feature/tipo-usuario` (9 commits atômicos, ainda não mergeada/aberta como PR). `mvn clean verify`: **104 testes passando, cobertura de linhas 96,72%**, gate do JaCoCo em 80% passando.
 
-**Branch:** `feature/tipo-usuario`
+### Estrutura real de pacotes
 
-**Estrutura:**
 ```
-domain/entity/TipoUsuario.java
-domain/repository/TipoUsuarioRepository.java
-application/dto/{CriarTipoUsuarioRequest, AtualizarTipoUsuarioRequest, TipoUsuarioResponse, AssociarTipoUsuarioRequest}.java
-application/usecase/{CriarTipoUsuarioUseCase, AtualizarTipoUsuarioUseCase, ExcluirTipoUsuarioUseCase, BuscarTipoUsuarioPorIdUseCase, ListarTiposUsuarioUseCase, AssociarTipoUsuarioAoUsuarioUseCase}.java
-infrastructure/persistence/tipousuario/{TipoUsuarioJpaEntity, TipoUsuarioJpaRepository, TipoUsuarioRepositoryImpl, TipoUsuarioMapper}.java
-infrastructure/controller/TipoUsuarioController.java
+domain/
+  entity/       TipoUsuario (já existia), Usuario ganhou o método associarTipo(UUID)
+  repository/   TipoUsuarioRepository (interface estendida com salvar, existePorNome, excluirPorId, listarPaginado)
+application/
+  dto/                      CriarTipoUsuarioRequest, AtualizarTipoUsuarioRequest, TipoUsuarioResponse, AssociarTipoUsuarioRequest
+  usecase/tipousuario/      CriarTipoUsuarioUseCase, AtualizarTipoUsuarioUseCase, ExcluirTipoUsuarioUseCase,
+                            BuscarTipoUsuarioPorIdUseCase, ListarTiposUsuarioUseCase, TipoUsuarioResponseFactory
+  usecase/usuario/          AssociarTipoUsuarioAoUsuarioUseCase (fica junto de usuario, pois quem é lido/mutado/salvo é o agregado Usuario)
+infrastructure/
+  persistence/tipousuario/  TipoUsuarioJpaRepository e TipoUsuarioRepositoryImpl completados (entidade JPA e mapper já existiam prontos)
+  controller/               TipoUsuarioController (novo); UsuarioController ganhou o endpoint de associação
 ```
 
-**Campos:** `TipoUsuario`: `id` (UUID), `nome` (String, obrigatório, único).
-
-**Endpoints:**
+### Endpoints reais
 
 | Método | Path | Códigos |
 |---|---|---|
 | POST | `/v1/tipos-usuario` | 201, 400, 409 |
-| GET | `/v1/tipos-usuario` | 200 |
+| GET | `/v1/tipos-usuario` | 200 (paginado) |
 | GET | `/v1/tipos-usuario/{id}` | 200, 404 |
 | PUT | `/v1/tipos-usuario/{id}` | 200, 400, 404, 409 |
 | DELETE | `/v1/tipos-usuario/{id}` | 204, 404 |
-| PATCH | `/v1/usuarios/{usuarioId}/tipo-usuario` | 200, 404 |
+| PATCH | `/v1/usuarios/{usuarioId}/tipo-usuario` | 200, 404 (no `UsuarioController`, não no `TipoUsuarioController`) |
 
-Reaproveitar `java.util.NoSuchElementException`/`RecursoJaExistenteException` (pacote `domain.exception`) já existentes (tratadas no `infrastructure.controller.handler.ControllerExceptionHandler`) em vez de criar exceções novas por domínio.
+### Decisões e pontos de atenção para os próximos membros
 
-**Migration:** a última usada pelo Membro 1 foi `V8__finalize_users_tipo_usuario_id.sql` — comece em `V9`, mas confira o último `Vn` real na `main` pós-merge antes de numerar a sua, caso algo tenha mudado.
-
-**Testes:** unitários de cada use case (mock dos repositórios) + `TipoUsuarioControllerIntegrationTest` (H2 + Flyway) cobrindo os 6 endpoints e erros.
-
-**Commits (exemplos):**
-```
-feat: adiciona entidade e repositorio de dominio de tipo de usuario
-feat: cria migration da tabela de tipos de usuario
-feat: adiciona casos de uso de tipo de usuario
-feat: adiciona controller rest de tipo de usuario
-feat: adiciona endpoint de associacao de tipo ao usuario
-test: cobre casos de uso e endpoints de tipo de usuario
-```
-
-Não é necessário atualizar README ou Postman nesta etapa — o README está propositalmente mínimo até a consolidação final (Membro 5), e a collection Postman é recriada do zero por ele ao final.
+- **Nenhuma migration nova foi criada** — o índice único `uk_tipos_usuario_nome` já existia desde `V4__create_table_tipos_usuario.sql`. Última migration continua sendo `V8__finalize_users_tipo_usuario_id.sql`; o Membro 3 começa a numerar a partir de `V9`.
+- Reaproveitadas `java.util.NoSuchElementException`/`RecursoJaExistenteException` (não foram criadas exceções novas por domínio) — sigam o mesmo padrão para Restaurante e Item de Cardápio.
+- Padrão de use case por pacote de agregado (`usecase/<agregado>/`) confirmado como convenção do projeto — Restaurante e Item de Cardápio devem seguir o mesmo layout (`usecase/restaurante/`, `usecase/itemcardapio/`), não um pacote plano.
+- Continua sem atualização de README ou Postman — ambos ficam para o Membro 5.
 
 **PR:** título `feat: adiciona dominio de tipo de usuario`, base `main`, pedir revisão de 1 colega.
 
 ---
 
-## Membro 3 — Domínio Restaurante
+## 3. Domínio Restaurante: 🕢PENDENTE
 
 **Pré-requisito:** confirmar merge do Membro 2. A tabela de usuário no banco chama-se `users` (o Membro 1 manteve o nome original em inglês na tabela, só as classes Java e endpoints viraram PT-BR) — use `REFERENCES users(id)` na FK do dono.
 
@@ -158,7 +150,7 @@ Não é necessário atualizar README ou Postman nesta etapa — fica a cargo do 
 
 ---
 
-## Membro 4 — Domínio Item de Cardápio
+## 4. Domínio Item de Cardápio: 🕢PENDENTE
 
 **Pré-requisito:** confirmar merge do Membro 3 (`Restaurante`/`RestauranteRepository` disponíveis).
 
@@ -205,7 +197,7 @@ Não é necessário atualizar README ou Postman nesta etapa — fica a cargo do 
 
 ---
 
-## Membro 5 — Consolidação (cobertura, Docker, docs, Postman, apoio ao vídeo)
+## 5. Consolidação (cobertura, Docker, docs, Postman, apoio ao vídeo): 🕢PENDENTE
 
 **Pré-requisito:** confirmar merge do Membro 4 e que `mvn clean verify` passa na `main`.
 
@@ -219,14 +211,3 @@ Não é necessário atualizar README ou Postman nesta etapa — fica a cargo do 
 - **README:** o README está propositalmente mínimo desde o início da Fase 2 (só instruções de execução) — escrever do zero as seções de arquitetura Clean Architecture, modelo de dados final (4 tabelas), tabela de endpoints completa (Auth + Usuários + Tipos de Usuário + Restaurantes + Itens de Cardápio) e seção de grupo.
 - **Postman:** a collection foi removida no início da Fase 2 — criar uma nova collection do zero (`postman/TechChallengeFase02-postman_collection.json`) cobrindo os 4 domínios, com uma pasta por domínio, variáveis de ambiente (`baseUrl`, `token`) e rodar via Runner na ordem lógica do fluxo antes de considerar pronta.
 - **Apoio ao vídeo (~5min):** roteiro sugerido — contexto (30s) → arquitetura em camadas (30s) → demo Postman do fluxo completo (2-3min) → Swagger UI (30s) → `mvn clean verify` com testes verdes e cobertura ≥80% (30s) → encerramento.
-
-**Commits:**
-```
-test: adiciona fluxo de integracao ponta a ponta entre os dominios
-test: cobre lacunas de cobertura identificadas pelo jacoco
-docs: consolida diagrama de arquitetura e modelo de dados no readme
-docs: consolida endpoints e instrucoes de execucao no readme
-chore: atualiza collection postman com fluxo completo de demonstracao
-```
-
-**PR:** título `chore: consolida testes, cobertura e documentacao da fase 2`. Depois desse merge, o grupo grava o vídeo final.

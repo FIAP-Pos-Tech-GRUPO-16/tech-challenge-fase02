@@ -7,4 +7,6 @@ import java.util.UUID;
 
 @Repository
 public interface TipoUsuarioJpaRepository extends JpaRepository<TipoUsuarioJpaEntity, UUID> {
+
+    boolean existsByNome(String nome);
 }

@@ -76,6 +76,26 @@ class CriarUsuarioUseCaseTest {
         }
 
         @Test
+        void deveCriarUsuarioComEnderecoSemCepQuandoCepNaoInformado() {
+            EnderecoDTO enderecoSemCep = new EnderecoDTO("Rua das Flores", "123", "São Paulo", null);
+            CriarUsuarioRequest request = new CriarUsuarioRequest("João Silva", "joao@email.com", "joao123", "123456", enderecoSemCep, TIPO_USUARIO_ID);
+            Usuario usuarioSalvo = buildUsuarioSalvo();
+
+            when(tipoUsuarioRepository.existePorId(TIPO_USUARIO_ID)).thenReturn(true);
+            when(usuarioRepository.existePorEmail("joao@email.com")).thenReturn(false);
+            when(usuarioRepository.existePorLogin("joao123")).thenReturn(false);
+            when(codificadorDeSenha.codificar("123456")).thenReturn("hashed");
+
+            ArgumentCaptor<Usuario> captor = ArgumentCaptor.forClass(Usuario.class);
+            when(usuarioRepository.salvar(any(Usuario.class))).thenReturn(usuarioSalvo);
+
+            useCase.executar(request);
+
+            verify(usuarioRepository).salvar(captor.capture());
+            assertThat(captor.getValue().getEndereco().getCep()).isNull();
+        }
+
+        @Test
         void deveCodificarSenhaAntesDeSalvar() {
             CriarUsuarioRequest request = buildRequest();
             Usuario usuarioSalvo = buildUsuarioSalvo();

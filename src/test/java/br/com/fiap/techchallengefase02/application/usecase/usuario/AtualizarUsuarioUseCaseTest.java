@@ -104,6 +104,51 @@ class AtualizarUsuarioUseCaseTest {
 
             assertThat(response.endereco().rua()).isEqualTo("Nova Rua");
         }
+
+        @Test
+        void deveAtualizarEnderecoSemCepQuandoCepNaoInformado() {
+            UUID id = UUID.randomUUID();
+            Usuario usuario = buildUsuario(id, "joao@email.com", "joao123");
+            EnderecoDTO enderecoSemCep = new EnderecoDTO("Nova Rua", "456", "Rio de Janeiro", null);
+            AtualizarUsuarioRequest request = new AtualizarUsuarioRequest(null, null, null, enderecoSemCep);
+
+            when(usuarioRepository.buscarPorId(id)).thenReturn(Optional.of(usuario));
+            when(usuarioRepository.salvar(usuario)).thenReturn(usuario);
+
+            UsuarioResponse response = useCase.executar(id, request);
+
+            assertThat(response.endereco().cep()).isNull();
+        }
+
+        @Test
+        void deveAtualizarEmailComSucessoQuandoNovoEmailNaoEstaEmUso() {
+            UUID id = UUID.randomUUID();
+            Usuario usuario = buildUsuario(id, "joao@email.com", "joao123");
+            AtualizarUsuarioRequest request = new AtualizarUsuarioRequest(null, "novoemail@email.com", null, null);
+
+            when(usuarioRepository.buscarPorId(id)).thenReturn(Optional.of(usuario));
+            when(usuarioRepository.existePorEmail("novoemail@email.com")).thenReturn(false);
+            when(usuarioRepository.salvar(usuario)).thenReturn(usuario);
+
+            UsuarioResponse response = useCase.executar(id, request);
+
+            assertThat(response.email()).isEqualTo("novoemail@email.com");
+        }
+
+        @Test
+        void deveAtualizarLoginComSucessoQuandoNovoLoginNaoEstaEmUso() {
+            UUID id = UUID.randomUUID();
+            Usuario usuario = buildUsuario(id, "joao@email.com", "joao123");
+            AtualizarUsuarioRequest request = new AtualizarUsuarioRequest(null, null, "novologin", null);
+
+            when(usuarioRepository.buscarPorId(id)).thenReturn(Optional.of(usuario));
+            when(usuarioRepository.existePorLogin("novologin")).thenReturn(false);
+            when(usuarioRepository.salvar(usuario)).thenReturn(usuario);
+
+            UsuarioResponse response = useCase.executar(id, request);
+
+            assertThat(response.login()).isEqualTo("novologin");
+        }
     }
 
     @Nested
