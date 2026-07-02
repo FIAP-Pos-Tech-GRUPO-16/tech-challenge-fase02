@@ -4,6 +4,7 @@
 
 ✅ Setup inicial, Refatoração para Clean Architecture, Configuração de Jacoco, Reescrita de testes Unitários, Ajsutes de Docker. 
 ✅ Domínio de Tipo de Usuário completo, CRUD completo
+✅ Domínio Restaurante completo, CRUD completo
 
 As seções abaixo foram atualizadas com os nomes reais de classes, pacotes, endpoints e migrations efetivamente entregues em cada etapa. Os membros do grupo devem usar essas referências.
 
@@ -101,50 +102,51 @@ infrastructure/
 
 ---
 
-## 3. Domínio Restaurante: 🕢PENDENTE
+## 3. Domínio Restaurante — Lucas Walim: ✅ ENTREGUE
 
-**Pré-requisito:** confirmar merge do Membro 2. A tabela de usuário no banco chama-se `users` (o Membro 1 manteve o nome original em inglês na tabela, só as classes Java e endpoints viraram PT-BR) — use `REFERENCES users(id)` na FK do dono.
+Branch: `feature/restaurante` (implementação do CRUD completo do domínio Restaurante seguindo o padrão de Clean Architecture já adotado nos domínios de Usuário e Tipo de Usuário).
 
-**Branch:** `feature/restaurante`
+### Estrutura real de pacotes
 
-**Estrutura:**
 ```
-domain/entity/{Restaurante, Endereco}.java   (Endereco é um VO próprio deste domínio, não reaproveitar o de Usuário)
-domain/repository/RestauranteRepository.java
-application/dto/{CriarRestauranteRequest, AtualizarRestauranteRequest, RestauranteResponse, EnderecoDTO}.java
-application/usecase/{CriarRestauranteUseCase, AtualizarRestauranteUseCase, ExcluirRestauranteUseCase, BuscarRestaurantePorIdUseCase, ListarRestaurantesUseCase}.java
-infrastructure/persistence/restaurante/{RestauranteJpaEntity, RestauranteJpaRepository, RestauranteRepositoryImpl, RestauranteMapper}.java
-infrastructure/controller/RestauranteController.java
+domain/
+  entity/       Restaurante (reutiliza o VO Endereco já existente no domínio)
+  repository/   RestauranteRepository
+application/
+  dto/                      CriarRestauranteRequest, AtualizarRestauranteRequest, RestauranteResponse
+  usecase/restaurante/      CriarRestauranteUseCase, AtualizarRestauranteUseCase, ExcluirRestauranteUseCase,
+                            BuscarRestaurantePorIdUseCase, ListarRestaurantesUseCase, RestauranteResponseFactory
+infrastructure/
+  persistence/restaurante/  RestauranteJpaEntity, EnderecoRestauranteJpaEmbeddable, RestauranteJpaRepository,
+                            RestauranteRepositoryImpl, RestauranteMapper
+  controller/               RestauranteController
 ```
-
-**Campos:** `nome`, `endereco` (rua/número/cidade/cep), `tipoCozinha` (texto livre, não enum), `horarioFuncionamento` (texto livre), `donoId` (UUID — FK simples a nível de banco, sem `@ManyToOne` navegável entre agregados).
 
 Não validar que o tipo do usuário seja "Dono de Restaurante" — fora do escopo pedido, só validar que o `donoId` existe.
 
-**Endpoints:**
+### Campos implementados
+
+`nome`, `endereco` (rua/número/cidade/cep), `tipoCozinha` (texto livre), `horarioFuncionamento` (texto livre) e `donoId` (UUID).
+
+### Endpoints reais
 
 | Método | Path | Códigos |
 |---|---|---|
-| POST | `/v1/restaurantes` | 201, 400, 404 (dono não existe) |
-| GET | `/v1/restaurantes` | 200 |
-| GET | `/v1/restaurantes/{id}` | 200, 404 |
-| PUT | `/v1/restaurantes/{id}` | 200, 400, 404 |
-| DELETE | `/v1/restaurantes/{id}` | 204, 404 |
+| POST | `/v1/restaurantes` | 201, 400, 404 (dono não existe), 401 |
+| GET | `/v1/restaurantes` | 200, 401 |
+| GET | `/v1/restaurantes/{id}` | 200, 404, 401 |
+| PUT | `/v1/restaurantes/{id}` | 200, 400, 404, 401 |
+| DELETE | `/v1/restaurantes/{id}` | 204, 404, 401 |
 
-**Migration:** `V{n+1}__create_table_restaurantes.sql` com FK `dono_id UUID NOT NULL REFERENCES users(id)`.
+### Decisões e pontos de atenção para os próximos membros
 
-**Testes:** unitários (incluindo caso "dono não existe") + `RestauranteControllerIntegrationTest`.
-
-**Commits:**
-```
-feat: adiciona entidade e repositorio de dominio de restaurante
-feat: cria migration da tabela de restaurantes
-feat: adiciona casos de uso de restaurante
-feat: adiciona controller rest de restaurante
-test: cobre casos de uso e endpoints de restaurante
-```
-
-Não é necessário atualizar README ou Postman nesta etapa — fica a cargo do Membro 5 na consolidação final.
+- **Tabela física no banco:** seguindo o padrão legado de `UsuarioJpaEntity`, os identificadores Java ficam em PT-BR, mas os nomes físicos no banco ficam em inglês. O domínio usa `Restaurante`/`donoId`; a persistência usa a tabela `restaurants` e a coluna `owner_id`.
+- **Migration criada:** `V9__create_table_restaurants.sql`, com FK `owner_id UUID NOT NULL REFERENCES users(id)`.
+- **Endereço de domínio:** `Restaurante` reutiliza o VO `domain.entity.Endereco`. Na camada JPA, foi mantido um embeddable próprio: `EnderecoRestauranteJpaEmbeddable`, mapeado para `address_street`, `address_number`, `address_city` e `address_zip_code`.
+- **Sem navegação entre agregados:** `donoId` é UUID simples, sem `@ManyToOne` para usuário.
+- **Regra de dono:** valida apenas se o `donoId` existe em `UsuarioRepository`. Não valida se o usuário é do tipo "Dono de Restaurante", pois o planejamento definiu isso como fora de escopo da Fase 2.
+- **Exceções:** reutiliza `java.util.NoSuchElementException` para 404, seguindo o padrão dos domínios anteriores.
+- O Membro 4 deve referenciar a tabela física `restaurants(id)` ao criar a FK de itens de cardápio.
 
 **PR:** título `feat: adiciona dominio de restaurante`.
 
@@ -152,7 +154,7 @@ Não é necessário atualizar README ou Postman nesta etapa — fica a cargo do 
 
 ## 4. Domínio Item de Cardápio: 🕢PENDENTE
 
-**Pré-requisito:** confirmar merge do Membro 3 (`Restaurante`/`RestauranteRepository` disponíveis).
+**Pré-requisito:** confirmar merge do Membro 3 (`Restaurante`/`RestauranteRepository` disponíveis e tabela física `restaurants` criada).
 
 **Branch:** `feature/item-cardapio`
 
@@ -178,7 +180,7 @@ infrastructure/controller/ItemCardapioController.java
 | PUT | `/v1/itens-cardapio/{id}` | 200, 400, 404 |
 | DELETE | `/v1/itens-cardapio/{id}` | 204, 404 |
 
-**Migration:** `V{n+1}__create_table_itens_cardapio.sql` com FK `restaurante_id UUID NOT NULL REFERENCES restaurantes(id)`.
+**Migration:** `V{n+1}__create_table_itens_cardapio.sql` com FK `restaurant_id UUID NOT NULL REFERENCES restaurants(id)` para seguir o padrão físico em inglês usado em `restaurants`.
 
 **Testes:** unitários (incluindo "restaurante não existe" e "preço inválido") + `ItemCardapioControllerIntegrationTest`.
 

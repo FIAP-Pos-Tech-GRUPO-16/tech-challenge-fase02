@@ -1,0 +1,22 @@
+package br.com.fiap.techchallengefase02.domain.entity;
+
+import lombok.*;
+import java.util.UUID;
+
+/**
+ * Entidade de dominio que representa um restaurante do sistema.
+ */
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Restaurante {
+
+    private UUID id;
+    private String nome;
+    private Endereco endereco;
+    private String tipoCozinha;
+    private String horarioFuncionamento;
+    private UUID donoId;
+}
