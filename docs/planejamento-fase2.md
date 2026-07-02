@@ -1,14 +1,11 @@
 # Planejamento da Fase 2 — Divisão de Trabalho do Grupo
 
-Este documento define como o trabalho da Fase 2 será dividido entre os 5 membros do grupo, em fila sequencial (um membro só começa depois que o PR do anterior for mergeado na `main`), para minimizar conflitos de merge.
-
 ## Status atual
 
-- Membro 1 (gabarito de Clean Architecture): **mergeado na `main`** (PR #1).
-- Membro 2 (Tipo de Usuário): **implementado** na branch `feature/tipo-usuario`, ainda não mergeada/aberta como PR.
-- Membros 3, 4 e 5: não iniciados.
+✅ Setup inicial, Refatoração para Clean Architecture, Configuração de Jacoco, Reescrita de testes Unitários, Ajsutes de Docker. 
+✅ Domínio de Tipo de Usuário completo, CRUD completo
 
-As seções abaixo foram atualizadas com os nomes reais de classes, pacotes, endpoints e migrations efetivamente entregues em cada etapa — os próximos membros devem usar essas referências (não as genéricas descritas originalmente).
+As seções abaixo foram atualizadas com os nomes reais de classes, pacotes, endpoints e migrations efetivamente entregues em cada etapa. Os membros do grupo devem usar essas referências.
 
 ## Regra de ouro
 
@@ -16,7 +13,7 @@ Fila sequencial, um de cada vez. Ninguém cria branch antes do PR anterior estar
 
 ---
 
-## Membro 1 — Rodrigo Cavalcante de Barros (setup e gabarito) — ENTREGUE
+## 1. Setup Inicial — Rodrigo Cavalcante de Barros: ✅ ENTREGUE
 
 Branch: `feature/clean-architecture-usuario` (9 commits atômicos, `mvn clean verify` com 72 testes passando e cobertura de linhas 93,11%, gate do JaCoCo em 80% configurado e passando).
 
@@ -62,7 +59,7 @@ infrastructure/
 
 ---
 
-## Membro 2 — Domínio Tipo de Usuário — ENTREGUE
+## 2. Domínio Tipo de Usuário — Rodrigo Cavalcante de Barros: ✅ ENTREGUE
 
 Branch: `feature/tipo-usuario` (9 commits atômicos, ainda não mergeada/aberta como PR). `mvn clean verify`: **104 testes passando, cobertura de linhas 96,72%**, gate do JaCoCo em 80% passando.
 
@@ -104,7 +101,7 @@ infrastructure/
 
 ---
 
-## Membro 3 — Domínio Restaurante
+## 3. Domínio Restaurante: 🕢PENDENTE
 
 **Pré-requisito:** confirmar merge do Membro 2. A tabela de usuário no banco chama-se `users` (o Membro 1 manteve o nome original em inglês na tabela, só as classes Java e endpoints viraram PT-BR) — use `REFERENCES users(id)` na FK do dono.
 
@@ -153,7 +150,7 @@ Não é necessário atualizar README ou Postman nesta etapa — fica a cargo do 
 
 ---
 
-## Membro 4 — Domínio Item de Cardápio
+## 4. Domínio Item de Cardápio: 🕢PENDENTE
 
 **Pré-requisito:** confirmar merge do Membro 3 (`Restaurante`/`RestauranteRepository` disponíveis).
 
@@ -200,7 +197,7 @@ Não é necessário atualizar README ou Postman nesta etapa — fica a cargo do 
 
 ---
 
-## Membro 5 — Consolidação (cobertura, Docker, docs, Postman, apoio ao vídeo)
+## 5. Consolidação (cobertura, Docker, docs, Postman, apoio ao vídeo): 🕢PENDENTE
 
 **Pré-requisito:** confirmar merge do Membro 4 e que `mvn clean verify` passa na `main`.
 
@@ -214,14 +211,3 @@ Não é necessário atualizar README ou Postman nesta etapa — fica a cargo do 
 - **README:** o README está propositalmente mínimo desde o início da Fase 2 (só instruções de execução) — escrever do zero as seções de arquitetura Clean Architecture, modelo de dados final (4 tabelas), tabela de endpoints completa (Auth + Usuários + Tipos de Usuário + Restaurantes + Itens de Cardápio) e seção de grupo.
 - **Postman:** a collection foi removida no início da Fase 2 — criar uma nova collection do zero (`postman/TechChallengeFase02-postman_collection.json`) cobrindo os 4 domínios, com uma pasta por domínio, variáveis de ambiente (`baseUrl`, `token`) e rodar via Runner na ordem lógica do fluxo antes de considerar pronta.
 - **Apoio ao vídeo (~5min):** roteiro sugerido — contexto (30s) → arquitetura em camadas (30s) → demo Postman do fluxo completo (2-3min) → Swagger UI (30s) → `mvn clean verify` com testes verdes e cobertura ≥80% (30s) → encerramento.
-
-**Commits:**
-```
-test: adiciona fluxo de integracao ponta a ponta entre os dominios
-test: cobre lacunas de cobertura identificadas pelo jacoco
-docs: consolida diagrama de arquitetura e modelo de dados no readme
-docs: consolida endpoints e instrucoes de execucao no readme
-chore: atualiza collection postman com fluxo completo de demonstracao
-```
-
-**PR:** título `chore: consolida testes, cobertura e documentacao da fase 2`. Depois desse merge, o grupo grava o vídeo final.
