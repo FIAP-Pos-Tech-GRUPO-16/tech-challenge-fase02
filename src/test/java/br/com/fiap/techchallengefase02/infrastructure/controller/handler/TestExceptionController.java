@@ -4,6 +4,7 @@ import br.com.fiap.techchallengefase02.application.dto.CriarUsuarioRequest;
 import br.com.fiap.techchallengefase02.domain.exception.CredenciaisInvalidasException;
 import br.com.fiap.techchallengefase02.domain.exception.RecursoJaExistenteException;
 import jakarta.validation.Valid;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.NoSuchElementException;
@@ -39,6 +40,11 @@ public class TestExceptionController {
     @GetMapping("/generic")
     public void generic() {
         throw new RuntimeException("Erro inesperado");
+    }
+
+    @GetMapping("/data-integrity")
+    public void dataIntegrity() {
+        throw new DataIntegrityViolationException("violação de chave estrangeira");
     }
 
     @PostMapping("/validate")

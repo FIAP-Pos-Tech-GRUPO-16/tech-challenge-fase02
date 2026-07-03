@@ -4,6 +4,7 @@ import br.com.fiap.techchallengefase02.domain.exception.CredenciaisInvalidasExce
 import br.com.fiap.techchallengefase02.domain.exception.RecursoJaExistenteException;
 import br.com.fiap.techchallengefase02.infrastructure.controller.response.ValidationError;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
@@ -74,6 +75,20 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail problemDetail = ProblemDetail.forStatus(409);
         problemDetail.setTitle("Recurso já existe");
         problemDetail.setDetail(ex.getMessage());
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
+
+        return ResponseEntity.status(409).body(problemDetail);
+    }
+
+    /**
+     * Violação de integridade referencial no banco (ex: excluir um usuário
+     * que é dono de restaurante). Responde 409 em vez de vazar um erro 500.
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ProblemDetail> handleDataIntegrityViolation(DataIntegrityViolationException ex, HttpServletRequest request) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(409);
+        problemDetail.setTitle("Conflito de dados");
+        problemDetail.setDetail("Não é possível concluir a operação: o registro possui vínculos com outros dados.");
         problemDetail.setInstance(URI.create(request.getRequestURI()));
 
         return ResponseEntity.status(409).body(problemDetail);
