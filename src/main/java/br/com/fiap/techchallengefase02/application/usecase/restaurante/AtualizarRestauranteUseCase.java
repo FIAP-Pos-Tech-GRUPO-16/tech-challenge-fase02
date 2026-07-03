@@ -1,9 +1,7 @@
 package br.com.fiap.techchallengefase02.application.usecase.restaurante;
 
 import br.com.fiap.techchallengefase02.application.dto.AtualizarRestauranteRequest;
-import br.com.fiap.techchallengefase02.application.dto.EnderecoDTO;
 import br.com.fiap.techchallengefase02.application.dto.RestauranteResponse;
-import br.com.fiap.techchallengefase02.domain.entity.Endereco;
 import br.com.fiap.techchallengefase02.domain.entity.Restaurante;
 import br.com.fiap.techchallengefase02.domain.repository.RestauranteRepository;
 import br.com.fiap.techchallengefase02.domain.repository.UsuarioRepository;
@@ -36,20 +34,11 @@ public class AtualizarRestauranteUseCase {
         }
 
         restaurante.setNome(request.nome().trim());
-        restaurante.setEndereco(paraEndereco(request.endereco()));
+        restaurante.setEndereco(request.endereco().paraDominio());
         restaurante.setTipoCozinha(request.tipoCozinha().trim());
         restaurante.setHorarioFuncionamento(request.horarioFuncionamento().trim());
         restaurante.setDonoId(request.donoId());
         Restaurante restauranteAtualizado = restauranteRepository.salvar(restaurante);
         return RestauranteResponseFactory.criar(restauranteAtualizado);
-    }
-
-    private Endereco paraEndereco(EnderecoDTO dto) {
-        return Endereco.builder()
-                .rua(dto.rua().trim())
-                .numero(dto.numero().trim())
-                .cidade(dto.cidade().trim())
-                .cep(dto.cep() == null ? null : dto.cep().trim())
-                .build();
     }
 }
