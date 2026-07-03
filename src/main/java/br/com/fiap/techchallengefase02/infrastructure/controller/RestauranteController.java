@@ -45,6 +45,7 @@ public class RestauranteController {
     private final BuscarRestaurantePorIdUseCase buscarRestaurantePorIdUseCase;
     private final ListarRestaurantesUseCase listarRestaurantesUseCase;
     private final ExcluirRestauranteUseCase excluirRestauranteUseCase;
+
     public RestauranteController(CriarRestauranteUseCase criarRestauranteUseCase,
                                  AtualizarRestauranteUseCase atualizarRestauranteUseCase,
                                  BuscarRestaurantePorIdUseCase buscarRestaurantePorIdUseCase,
@@ -56,6 +57,7 @@ public class RestauranteController {
         this.listarRestaurantesUseCase = listarRestaurantesUseCase;
         this.excluirRestauranteUseCase = excluirRestauranteUseCase;
     }
+
     @PostMapping
     @Operation(summary = "Criar restaurante", description = "Cadastra um novo restaurante associado a um usuário dono existente")
     @ApiResponses({
@@ -65,11 +67,11 @@ public class RestauranteController {
             @ApiResponse(responseCode = "404", description = "Dono não encontrado",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
-
     public ResponseEntity<ApiSuccessResponse<RestauranteResponse>> criar(@RequestBody @Valid CriarRestauranteRequest request) {
         RestauranteResponse response = criarRestauranteUseCase.executar(request);
         return ApiSuccessResponse.created(response, "Restaurante criado com sucesso");
     }
+
     @GetMapping
     @Operation(summary = "Listar restaurantes", description = "Retorna uma lista paginada de restaurantes cadastrados")
     @ApiResponses({
@@ -83,6 +85,7 @@ public class RestauranteController {
         Pagina<RestauranteResponse> resultado = listarRestaurantesUseCase.executar(page, size);
         return ApiSuccessResponse.ok(resultado.conteudo(), Meta.from(resultado));
     }
+
     @GetMapping("/{id}")
     @Operation(summary = "Buscar restaurante por ID", description = "Retorna os dados de um restaurante a partir do seu ID")
     @ApiResponses({
@@ -90,11 +93,11 @@ public class RestauranteController {
             @ApiResponse(responseCode = "404", description = "Restaurante não encontrado",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
-
     public ResponseEntity<ApiSuccessResponse<RestauranteResponse>> buscarPorId(@PathVariable UUID id) {
         RestauranteResponse response = buscarRestaurantePorIdUseCase.executar(id);
         return ApiSuccessResponse.ok(response);
     }
+
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar restaurante", description = "Atualiza os dados de um restaurante existente")
     @ApiResponses({
@@ -109,6 +112,7 @@ public class RestauranteController {
         RestauranteResponse response = atualizarRestauranteUseCase.executar(id, request);
         return ApiSuccessResponse.ok(response);
     }
+
     @DeleteMapping("/{id}")
     @Operation(summary = "Remover restaurante", description = "Exclui permanentemente um restaurante pelo seu ID")
     @ApiResponses({
@@ -116,7 +120,6 @@ public class RestauranteController {
             @ApiResponse(responseCode = "404", description = "Restaurante não encontrado",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
-
     public ResponseEntity<Void> excluir(@PathVariable UUID id) {
         excluirRestauranteUseCase.executar(id);
         return ApiSuccessResponse.noContent();

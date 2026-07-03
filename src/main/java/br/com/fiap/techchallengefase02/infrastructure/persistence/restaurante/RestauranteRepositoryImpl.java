@@ -19,19 +19,19 @@ public class RestauranteRepositoryImpl implements RestauranteRepository {
         this.jpaRepository = jpaRepository;
         this.mapper = mapper;
     }
-    @Override
 
+    @Override
     public Restaurante salvar(Restaurante restaurante) {
         RestauranteJpaEntity entidadeSalva = jpaRepository.save(mapper.toJpaEntity(restaurante));
         return mapper.toDomain(entidadeSalva);
     }
-    @Override
 
+    @Override
     public Optional<Restaurante> buscarPorId(UUID id) {
         return jpaRepository.findById(id).map(mapper::toDomain);
     }
-    @Override
 
+    @Override
     public ResultadoPaginado<Restaurante> listarPaginado(int pagina, int tamanho) {
         Page<RestauranteJpaEntity> resultado = jpaRepository.findAll(PageRequest.of(pagina, tamanho));
         return new ResultadoPaginado<>(
@@ -42,13 +42,13 @@ public class RestauranteRepositoryImpl implements RestauranteRepository {
                 resultado.getSize()
         );
     }
-    @Override
 
+    @Override
     public boolean existePorId(UUID id) {
         return jpaRepository.existsById(id);
     }
-    @Override
 
+    @Override
     public void excluirPorId(UUID id) {
         jpaRepository.deleteById(id);
     }
