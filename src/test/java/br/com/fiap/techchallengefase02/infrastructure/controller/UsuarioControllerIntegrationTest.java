@@ -322,6 +322,42 @@ class UsuarioControllerIntegrationTest {
                             .header("Authorization", tokenValido()))
                     .andExpect(status().isNotFound());
         }
+
+        @Test
+        void deveRetornar409QuandoUsuarioForDonoDeRestaurante() throws Exception {
+            String corpoResposta = mockMvc.perform(post("/v1/usuarios")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(jsonCriarUsuario(emailUnico(), loginUnico())))
+                    .andReturn().getResponse().getContentAsString();
+
+            String donoId = objectMapper.readTree(corpoResposta).get("data").get("id").asText();
+
+            String corpoRestaurante = """
+                    {
+                      "nome": "Restaurante do Dono",
+                      "endereco": {
+                        "rua": "Rua Gourmet",
+                        "numero": "45",
+                        "cidade": "São Paulo",
+                        "cep": "01310100"
+                      },
+                      "tipoCozinha": "Italiana",
+                      "horarioFuncionamento": "Segunda a sexta, das 11h às 22h",
+                      "donoId": "%s"
+                    }
+                    """.formatted(donoId);
+
+            mockMvc.perform(post("/v1/restaurantes")
+                            .header("Authorization", tokenValido())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(corpoRestaurante))
+                    .andExpect(status().isCreated());
+
+            mockMvc.perform(delete("/v1/usuarios/{id}", donoId)
+                            .header("Authorization", tokenValido()))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.title").value("Conflito de dados"));
+        }
     }
 
     @Nested

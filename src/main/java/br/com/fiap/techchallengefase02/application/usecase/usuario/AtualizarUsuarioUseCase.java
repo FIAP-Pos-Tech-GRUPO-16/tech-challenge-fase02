@@ -1,9 +1,7 @@
 package br.com.fiap.techchallengefase02.application.usecase.usuario;
 
 import br.com.fiap.techchallengefase02.application.dto.AtualizarUsuarioRequest;
-import br.com.fiap.techchallengefase02.application.dto.EnderecoDTO;
 import br.com.fiap.techchallengefase02.application.dto.UsuarioResponse;
-import br.com.fiap.techchallengefase02.domain.entity.Endereco;
 import br.com.fiap.techchallengefase02.domain.entity.Usuario;
 import br.com.fiap.techchallengefase02.domain.exception.RecursoJaExistenteException;
 import br.com.fiap.techchallengefase02.domain.repository.UsuarioRepository;
@@ -47,7 +45,7 @@ public class AtualizarUsuarioUseCase {
         }
 
         if (request.endereco() != null) {
-            usuario.setEndereco(paraEndereco(request.endereco()));
+            usuario.setEndereco(request.endereco().paraDominio());
         }
 
         usuario.marcarComoAlterado();
@@ -55,14 +53,5 @@ public class AtualizarUsuarioUseCase {
         Usuario usuarioAtualizado = usuarioRepository.salvar(usuario);
 
         return UsuarioResponseFactory.criar(usuarioAtualizado);
-    }
-
-    private Endereco paraEndereco(EnderecoDTO dto) {
-        return Endereco.builder()
-                .rua(dto.rua().trim())
-                .numero(dto.numero().trim())
-                .cidade(dto.cidade().trim())
-                .cep(dto.cep() == null ? null : dto.cep().trim())
-                .build();
     }
 }

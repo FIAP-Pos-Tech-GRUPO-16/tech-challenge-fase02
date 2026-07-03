@@ -56,6 +56,26 @@ A aplicação estará disponível em: http://localhost:8080
 http://localhost:8080/swagger-ui/index.html
 ```
 
+## Endpoints da API
+
+> A documentação completa e interativa de todos os endpoints está disponível no Swagger (link acima). A tabela abaixo resume os endpoints do domínio de Restaurante; os demais domínios serão consolidados aqui ao final da entrega.
+
+### Restaurantes (`/v1/restaurantes`)
+
+Todos os endpoints exigem autenticação via JWT (header `Authorization: Bearer <token>`, obtido em `POST /v1/autenticacao/login`).
+
+| Método | Path | Descrição | Códigos de resposta |
+|---|---|---|---|
+| POST | `/v1/restaurantes` | Cadastra um restaurante associado a um usuário dono existente | 201, 400, 404 (dono não existe), 401 |
+| GET | `/v1/restaurantes?page=0&size=10` | Lista restaurantes de forma paginada | 200, 401 |
+| GET | `/v1/restaurantes/{id}` | Busca um restaurante pelo ID | 200, 404, 401 |
+| PUT | `/v1/restaurantes/{id}` | Atualiza os dados de um restaurante existente | 200, 400, 404, 401 |
+| DELETE | `/v1/restaurantes/{id}` | Exclui permanentemente um restaurante | 204, 404, 401 |
+
+Campos do restaurante: `nome`, `endereco` (rua, número, cidade, cep), `tipoCozinha`, `horarioFuncionamento` e `donoId` (UUID de um usuário existente, responsável pelo restaurante).
+
+---
+
 ### Testes e cobertura
 
 ```bash

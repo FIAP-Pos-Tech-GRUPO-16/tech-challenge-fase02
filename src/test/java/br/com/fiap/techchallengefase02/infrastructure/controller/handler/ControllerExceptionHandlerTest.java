@@ -55,6 +55,15 @@ class ControllerExceptionHandlerTest {
     }
 
     @Test
+    void deveRetornar409QuandoDataIntegrityViolationException() throws Exception {
+        mockMvc.perform(get("/test/exceptions/data-integrity"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.title").value("Conflito de dados"))
+                .andExpect(jsonPath("$.detail").value("Não é possível concluir a operação: o registro possui vínculos com outros dados."))
+                .andExpect(jsonPath("$.instance").exists());
+    }
+
+    @Test
     void deveRetornar500QuandoExcecaoInesperada() throws Exception {
         mockMvc.perform(get("/test/exceptions/generic"))
                 .andExpect(status().isInternalServerError())
