@@ -18,7 +18,7 @@ public record RestauranteResponse(
         @Schema(example = "Italiana")
         String tipoCozinha,
 
-        @Schema(example = "Segunda a sexta, das 11h as 22h")
+        @Schema(example = "Segunda a sexta, das 11h às 22h")
         String horarioFuncionamento,
 
         @Schema(example = "22222222-2222-2222-2222-222222222222")

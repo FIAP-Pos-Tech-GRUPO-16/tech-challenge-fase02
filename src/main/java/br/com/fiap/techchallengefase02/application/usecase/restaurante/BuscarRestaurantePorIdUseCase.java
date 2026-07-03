@@ -22,7 +22,7 @@ public class BuscarRestaurantePorIdUseCase {
 
     public RestauranteResponse executar(UUID id) {
         Restaurante restaurante = restauranteRepository.buscarPorId(id)
-                .orElseThrow(() -> new NoSuchElementException("Restaurante nao encontrado"));
+                .orElseThrow(() -> new NoSuchElementException("Restaurante não encontrado"));
         return RestauranteResponseFactory.criar(restaurante);
     }
 }

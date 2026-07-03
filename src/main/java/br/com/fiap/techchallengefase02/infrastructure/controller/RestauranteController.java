@@ -57,12 +57,12 @@ public class RestauranteController {
         this.excluirRestauranteUseCase = excluirRestauranteUseCase;
     }
     @PostMapping
-    @Operation(summary = "Criar restaurante", description = "Cadastra um novo restaurante associado a um usuario dono existente")
+    @Operation(summary = "Criar restaurante", description = "Cadastra um novo restaurante associado a um usuário dono existente")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Restaurante criado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados invalidos",
+            @ApiResponse(responseCode = "400", description = "Dados inválidos",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "404", description = "Dono nao encontrado",
+            @ApiResponse(responseCode = "404", description = "Dono não encontrado",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
 
@@ -76,9 +76,9 @@ public class RestauranteController {
             @ApiResponse(responseCode = "200", description = "Busca realizada com sucesso")
     })
     public ResponseEntity<ApiSuccessResponse<List<RestauranteResponse>>> listar(
-            @Parameter(description = "Numero da pagina (comeca em 0)", example = "0")
+            @Parameter(description = "Número da página (começa em 0)", example = "0")
             @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Quantidade de itens por pagina", example = "10")
+            @Parameter(description = "Quantidade de itens por página", example = "10")
             @RequestParam(defaultValue = "10") int size) {
         Pagina<RestauranteResponse> resultado = listarRestaurantesUseCase.executar(page, size);
         return ApiSuccessResponse.ok(resultado.conteudo(), Meta.from(resultado));
@@ -87,7 +87,7 @@ public class RestauranteController {
     @Operation(summary = "Buscar restaurante por ID", description = "Retorna os dados de um restaurante a partir do seu ID")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Restaurante encontrado"),
-            @ApiResponse(responseCode = "404", description = "Restaurante nao encontrado",
+            @ApiResponse(responseCode = "404", description = "Restaurante não encontrado",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
 
@@ -99,9 +99,9 @@ public class RestauranteController {
     @Operation(summary = "Atualizar restaurante", description = "Atualiza os dados de um restaurante existente")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Restaurante atualizado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados invalidos",
+            @ApiResponse(responseCode = "400", description = "Dados inválidos",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "404", description = "Restaurante ou dono nao encontrado",
+            @ApiResponse(responseCode = "404", description = "Restaurante ou dono não encontrado",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity<ApiSuccessResponse<RestauranteResponse>> atualizar(@PathVariable UUID id,
@@ -113,7 +113,7 @@ public class RestauranteController {
     @Operation(summary = "Remover restaurante", description = "Exclui permanentemente um restaurante pelo seu ID")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Restaurante removido com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Restaurante nao encontrado",
+            @ApiResponse(responseCode = "404", description = "Restaurante não encontrado",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
 

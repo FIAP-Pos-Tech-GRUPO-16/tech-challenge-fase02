@@ -4,7 +4,7 @@ import lombok.*;
 import java.util.UUID;
 
 /**
- * Entidade de dominio que representa um restaurante do sistema.
+ * Entidade de domínio que representa um restaurante do sistema.
  */
 @Getter
 @Setter

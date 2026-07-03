@@ -32,7 +32,7 @@ class ExcluirRestauranteUseCaseTest {
         when(restauranteRepository.existePorId(id)).thenReturn(false);
         assertThatThrownBy(() -> useCase.executar(id))
                 .isInstanceOf(NoSuchElementException.class)
-                .hasMessage("Restaurante nao encontrado");
+                .hasMessage("Restaurante não encontrado");
         verify(restauranteRepository, never()).excluirPorId(any());
     }
 }

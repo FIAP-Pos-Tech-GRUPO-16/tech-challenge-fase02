@@ -58,7 +58,7 @@ class AtualizarRestauranteUseCaseTest {
             when(restauranteRepository.buscarPorId(id)).thenReturn(Optional.empty());
             assertThatThrownBy(() -> useCase.executar(id, request(donoId)))
                     .isInstanceOf(NoSuchElementException.class)
-                    .hasMessage("Restaurante nao encontrado");
+                    .hasMessage("Restaurante não encontrado");
             verify(restauranteRepository, never()).salvar(any());
         }
         @Test
@@ -70,7 +70,7 @@ class AtualizarRestauranteUseCaseTest {
             when(usuarioRepository.existePorId(donoId)).thenReturn(false);
             assertThatThrownBy(() -> useCase.executar(id, request(donoId)))
                     .isInstanceOf(NoSuchElementException.class)
-                    .hasMessage("Dono do restaurante nao encontrado");
+                    .hasMessage("Dono do restaurante não encontrado");
             verify(restauranteRepository, never()).salvar(any());
         }
     }

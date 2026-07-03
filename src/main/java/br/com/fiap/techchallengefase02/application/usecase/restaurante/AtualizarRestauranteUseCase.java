@@ -29,10 +29,10 @@ public class AtualizarRestauranteUseCase {
 
     public RestauranteResponse executar(UUID id, AtualizarRestauranteRequest request) {
         Restaurante restaurante = restauranteRepository.buscarPorId(id)
-                .orElseThrow(() -> new NoSuchElementException("Restaurante nao encontrado"));
+                .orElseThrow(() -> new NoSuchElementException("Restaurante não encontrado"));
 
         if (!usuarioRepository.existePorId(request.donoId())) {
-            throw new NoSuchElementException("Dono do restaurante nao encontrado");
+            throw new NoSuchElementException("Dono do restaurante não encontrado");
         }
 
         restaurante.setNome(request.nome().trim());

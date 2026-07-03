@@ -20,7 +20,7 @@ public class ExcluirRestauranteUseCase {
 
     public void executar(UUID id) {
         if (!restauranteRepository.existePorId(id)) {
-            throw new NoSuchElementException("Restaurante nao encontrado");
+            throw new NoSuchElementException("Restaurante não encontrado");
         }
         restauranteRepository.excluirPorId(id);
     }

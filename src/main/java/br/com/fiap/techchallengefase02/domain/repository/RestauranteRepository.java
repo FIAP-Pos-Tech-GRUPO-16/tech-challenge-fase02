@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Contrato de persistencia de {@link Restaurante}. A implementacao concreta
+ * Contrato de persistência de {@link Restaurante}. A implementação concreta
  * (JPA) vive em {@code infrastructure.persistence.restaurante}.
  */
 public interface RestauranteRepository {

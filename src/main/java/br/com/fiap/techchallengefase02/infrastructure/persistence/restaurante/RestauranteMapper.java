@@ -4,7 +4,7 @@ import br.com.fiap.techchallengefase02.domain.entity.Restaurante;
 import org.mapstruct.Mapper;
 
 /**
- * Conversao entre a entidade de dominio {@link Restaurante} e a entidade
+ * Conversão entre a entidade de domínio {@link Restaurante} e a entidade
  * JPA {@link RestauranteJpaEntity}.
  */
 @Mapper(componentModel = "spring")

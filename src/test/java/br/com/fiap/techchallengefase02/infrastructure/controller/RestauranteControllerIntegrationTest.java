@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Teste de integracao ponta a ponta do {@link RestauranteController}, subindo
+ * Teste de integração ponta a ponta do {@link RestauranteController}, subindo
  * o contexto Spring completo com banco H2 e migrations Flyway reais.
  */
 @SpringBootTest

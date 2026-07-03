@@ -85,7 +85,7 @@ class CriarRestauranteUseCaseTest {
             when(usuarioRepository.existePorId(donoId)).thenReturn(false);
             assertThatThrownBy(() -> useCase.executar(request(donoId)))
                     .isInstanceOf(NoSuchElementException.class)
-                    .hasMessage("Dono do restaurante nao encontrado");
+                    .hasMessage("Dono do restaurante não encontrado");
             verify(restauranteRepository, never()).salvar(any());
         }
     }

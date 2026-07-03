@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-@Schema(description = "Endereço do usuário")
+@Schema(description = "Dados de endereço (compartilhado entre usuário e restaurante)")
 public record EnderecoDTO(
 
         @NotBlank(message = "Rua é obrigatória")

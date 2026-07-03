@@ -38,6 +38,6 @@ class BuscarRestaurantePorIdUseCaseTest {
         when(restauranteRepository.buscarPorId(id)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> useCase.executar(id))
                 .isInstanceOf(NoSuchElementException.class)
-                .hasMessage("Restaurante nao encontrado");
+                .hasMessage("Restaurante não encontrado");
     }
 }

@@ -16,7 +16,7 @@ import java.util.UUID;
 
 /**
  * Entidade JPA de Restaurante. Persiste na tabela {@code restaurants}.
- * Os nomes fisicos no banco seguem o padrao em ingles, enquanto os
+ * Os nomes físicos no banco seguem o padrão em inglês, enquanto os
  * identificadores Java permanecem em PT-BR.
  */
 @Entity

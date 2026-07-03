@@ -14,7 +14,7 @@ import java.util.NoSuchElementException;
 /**
  * Caso de uso: criar um novo restaurante.
  * <p>
- * Valida apenas se o usuario dono existe. Validar tipo/perfil do usuario esta
+ * Valida apenas se o usuário dono existe. Validar tipo/perfil do usuário está
  * fora do escopo documentado para esta etapa.
  */
 @Component
@@ -31,7 +31,7 @@ public class CriarRestauranteUseCase {
 
     public RestauranteResponse executar(CriarRestauranteRequest request) {
         if (!usuarioRepository.existePorId(request.donoId())) {
-            throw new NoSuchElementException("Dono do restaurante nao encontrado");
+            throw new NoSuchElementException("Dono do restaurante não encontrado");
         }
         Restaurante restaurante = Restaurante.builder()
                 .nome(request.nome().trim())
