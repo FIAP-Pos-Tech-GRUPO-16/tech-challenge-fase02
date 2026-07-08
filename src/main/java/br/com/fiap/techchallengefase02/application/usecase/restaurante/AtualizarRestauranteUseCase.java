@@ -10,9 +10,6 @@ import org.springframework.stereotype.Component;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-/**
- * Caso de uso: atualizar os dados de um restaurante existente.
- */
 @Component
 public class AtualizarRestauranteUseCase {
 

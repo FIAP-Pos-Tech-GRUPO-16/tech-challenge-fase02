@@ -5,10 +5,6 @@ import br.com.fiap.techchallengefase02.domain.entity.Usuario;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Contrato de persistência de {@link Usuario}. A implementação concreta
- * (JPA) vive em {@code infrastructure.persistence.usuario}.
- */
 public interface UsuarioRepository {
 
     Usuario salvar(Usuario usuario);

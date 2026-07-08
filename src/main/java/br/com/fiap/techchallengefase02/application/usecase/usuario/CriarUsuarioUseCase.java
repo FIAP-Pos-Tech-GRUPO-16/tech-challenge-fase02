@@ -11,13 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.NoSuchElementException;
 
-/**
- * Caso de uso: criar um novo usuário.
- *
- * Valida que o {@code tipoUsuarioId} informado existe, e que email/login
- * ainda não estão em uso, antes de persistir o usuário com a senha
- * codificada.
- */
 @Component
 public class CriarUsuarioUseCase {
 

@@ -9,16 +9,6 @@ import org.springframework.stereotype.Component;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-/**
- * Caso de uso: associar um tipo de usuário existente a um usuário já
- * cadastrado.
- *
- * Fica no pacote de casos de uso de {@code Usuario} (e não no de
- * {@code TipoUsuario}) porque quem é alterado e salvo é o agregado
- * {@link Usuario} — mesmo padrão já usado em {@link CriarUsuarioUseCase},
- * que também depende de {@link TipoUsuarioRepository} apenas para validar
- * o tipo informado.
- */
 @Component
 public class AssociarTipoUsuarioAoUsuarioUseCase {
 

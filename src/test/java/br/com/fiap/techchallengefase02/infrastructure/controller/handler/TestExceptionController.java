@@ -9,10 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.NoSuchElementException;
 
-/**
- * Controller usado apenas em teste para exercitar o {@link ControllerExceptionHandler}
- * sem depender de um domínio real.
- */
 @RestController
 @RequestMapping("/test/exceptions")
 public class TestExceptionController {

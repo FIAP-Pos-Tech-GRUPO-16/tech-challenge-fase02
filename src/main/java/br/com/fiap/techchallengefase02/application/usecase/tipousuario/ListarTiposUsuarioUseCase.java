@@ -7,9 +7,6 @@ import br.com.fiap.techchallengefase02.domain.repository.ResultadoPaginado;
 import br.com.fiap.techchallengefase02.domain.repository.TipoUsuarioRepository;
 import org.springframework.stereotype.Component;
 
-/**
- * Caso de uso: listar os tipos de usuário cadastrados, de forma paginada.
- */
 @Component
 public class ListarTiposUsuarioUseCase {
 

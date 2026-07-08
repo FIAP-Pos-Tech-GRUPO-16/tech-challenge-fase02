@@ -5,10 +5,6 @@ import br.com.fiap.techchallengefase02.domain.entity.TipoUsuario;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Contrato de persistência de {@link TipoUsuario}. A implementação concreta
- * (JPA) vive em {@code infrastructure.persistence.tipousuario}.
- */
 public interface TipoUsuarioRepository {
 
     Optional<TipoUsuario> buscarPorId(UUID id);

@@ -7,10 +7,6 @@ import br.com.fiap.techchallengefase02.domain.repository.ResultadoPaginado;
 import br.com.fiap.techchallengefase02.domain.repository.UsuarioRepository;
 import org.springframework.stereotype.Component;
 
-/**
- * Caso de uso: buscar usuários cujo nome contenha o termo informado, de
- * forma paginada.
- */
 @Component
 public class BuscarUsuariosPorNomeUseCase {
 

@@ -9,9 +9,6 @@ import br.com.fiap.techchallengefase02.domain.exception.CredenciaisInvalidasExce
 import br.com.fiap.techchallengefase02.domain.repository.UsuarioRepository;
 import org.springframework.stereotype.Component;
 
-/**
- * Caso de uso: autenticar um usuário (login) e gerar seu token JWT.
- */
 @Component
 public class AutenticarUsuarioUseCase {
 

@@ -6,13 +6,6 @@ import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * As sobrecargas testadas aqui ({@code ok(data, message, meta)},
- * {@code created(data)} e {@code created(data, message, meta)}) fazem parte
- * da API pública do envelope de resposta, mas nenhum controller hoje precisa
- * delas — os demais métodos já são exercitados indiretamente pelos testes de
- * integração dos controllers.
- */
 class ApiSuccessResponseTest {
 
     private final Meta meta = new Meta(10L, 2, 0, 5, true, false);

@@ -9,10 +9,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-/**
- * Caso de uso: alterar a senha de um usuário, mediante confirmação do
- * login e da senha atual.
- */
 @Component
 public class AlterarSenhaUseCase {
 

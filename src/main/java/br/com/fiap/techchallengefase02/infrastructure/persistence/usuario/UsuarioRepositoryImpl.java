@@ -10,11 +10,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Implementação do contrato de domínio {@link UsuarioRepository} usando
- * Spring Data JPA. É a única camada que conhece {@code Page}/{@code Pageable}
- * — o domínio e a aplicação só lidam com {@link ResultadoPaginado}.
- */
 @Repository
 public class UsuarioRepositoryImpl implements UsuarioRepository {
 

@@ -9,14 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 
-/**
- * Implementação de {@link UserDetailsService} do Spring Security, detalhe
- * de framework isolado na infraestrutura. Depende apenas do contrato de
- * domínio {@link UsuarioRepository}.
- *
- * Não atribui nenhuma authority/role — controle de acesso por tipo de
- * usuário não é escopo desta etapa.
- */
 @Service
 public class UsuarioDetailsServiceImpl implements UserDetailsService {
 

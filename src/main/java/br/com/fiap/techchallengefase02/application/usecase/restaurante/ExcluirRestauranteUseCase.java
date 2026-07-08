@@ -6,9 +6,6 @@ import org.springframework.stereotype.Component;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-/**
- * Caso de uso: excluir permanentemente um restaurante pelo ID.
- */
 @Component
 public class ExcluirRestauranteUseCase {
 

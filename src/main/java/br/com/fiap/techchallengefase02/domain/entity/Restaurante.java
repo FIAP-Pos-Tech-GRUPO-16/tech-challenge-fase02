@@ -8,9 +8,6 @@ import lombok.Setter;
 
 import java.util.UUID;
 
-/**
- * Entidade de domínio que representa um restaurante do sistema.
- */
 @Getter
 @Setter
 @Builder

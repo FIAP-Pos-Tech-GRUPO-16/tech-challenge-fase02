@@ -80,10 +80,6 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(409).body(problemDetail);
     }
 
-    /**
-     * Violação de integridade referencial no banco (ex: excluir um usuário
-     * que é dono de restaurante). Responde 409 em vez de vazar um erro 500.
-     */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ProblemDetail> handleDataIntegrityViolation(DataIntegrityViolationException ex, HttpServletRequest request) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(409);

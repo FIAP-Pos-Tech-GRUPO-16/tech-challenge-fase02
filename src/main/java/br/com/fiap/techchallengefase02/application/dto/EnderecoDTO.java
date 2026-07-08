@@ -29,11 +29,6 @@ public record EnderecoDTO(
         String cep
 ) {
 
-    /**
-     * Converte este DTO para o value object {@link Endereco} do domínio,
-     * normalizando os campos (trim). Centraliza a conversão usada pelos
-     * casos de uso que recebem endereço na entrada.
-     */
     public Endereco paraDominio() {
         return Endereco.builder()
                 .rua(rua.trim())

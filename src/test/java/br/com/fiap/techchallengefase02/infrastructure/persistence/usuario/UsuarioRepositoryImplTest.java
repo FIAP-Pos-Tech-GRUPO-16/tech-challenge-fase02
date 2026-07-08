@@ -13,12 +13,6 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-/**
- * {@code buscarPorEmail} não é usado por nenhum caso de uso hoje, mas faz
- * parte do contrato {@link br.com.fiap.techchallengefase02.domain.repository.UsuarioRepository}
- * e precisa se comportar corretamente (delegando ao Spring Data e mapeando
- * o resultado para o domínio).
- */
 @ExtendWith(MockitoExtension.class)
 class UsuarioRepositoryImplTest {
 

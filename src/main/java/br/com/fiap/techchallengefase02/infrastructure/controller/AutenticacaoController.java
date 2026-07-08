@@ -18,15 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Endpoint de autenticação. A troca de senha foi movida para
- * {@code PUT /v1/usuarios/{id}/senha} em {@link UsuarioController} — faz
- * mais sentido REST-wise tratar senha como um recurso do próprio usuário.
- *
- * Optou-se por {@code /v1/autenticacao} (em vez de {@code /v1/auth}) para
- * manter consistência total com a regra de nomenclatura em PT-BR do
- * CLAUDE.md, já que também é o nome escolhido para este controller.
- */
 @RestController
 @RequestMapping("/v1/autenticacao")
 @Tag(name = "Autenticação", description = "Autenticação de usuários")

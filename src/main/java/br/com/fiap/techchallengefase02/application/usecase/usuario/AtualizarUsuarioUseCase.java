@@ -10,9 +10,6 @@ import org.springframework.stereotype.Component;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-/**
- * Caso de uso: atualizar parcialmente os dados de um usuário (exceto senha).
- */
 @Component
 public class AtualizarUsuarioUseCase {
 

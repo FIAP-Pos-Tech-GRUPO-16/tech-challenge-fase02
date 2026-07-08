@@ -6,9 +6,6 @@ import org.springframework.stereotype.Component;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-/**
- * Caso de uso: excluir permanentemente um tipo de usuário pelo ID.
- */
 @Component
 public class ExcluirTipoUsuarioUseCase {
 

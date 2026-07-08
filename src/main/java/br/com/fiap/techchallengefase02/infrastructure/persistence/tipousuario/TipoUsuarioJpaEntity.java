@@ -13,9 +13,6 @@ import lombok.Setter;
 
 import java.util.UUID;
 
-/**
- * Entidade JPA de Tipo de Usuário. Persiste na tabela {@code tipos_usuario}.
- */
 @Entity
 @Table(name = "tipos_usuario")
 @Getter

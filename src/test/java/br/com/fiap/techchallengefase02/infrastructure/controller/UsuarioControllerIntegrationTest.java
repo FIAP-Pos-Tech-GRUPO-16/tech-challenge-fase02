@@ -17,10 +17,6 @@ import java.util.UUID;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * Teste de integração ponta a ponta do {@link UsuarioController}, subindo
- * o contexto Spring completo com banco H2 e migrations Flyway reais.
- */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")

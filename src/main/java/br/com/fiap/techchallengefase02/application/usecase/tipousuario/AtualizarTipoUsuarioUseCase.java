@@ -10,9 +10,6 @@ import org.springframework.stereotype.Component;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-/**
- * Caso de uso: atualizar o nome de um tipo de usuário existente.
- */
 @Component
 public class AtualizarTipoUsuarioUseCase {
 

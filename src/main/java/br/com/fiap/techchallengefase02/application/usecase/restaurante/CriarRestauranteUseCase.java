@@ -9,12 +9,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.NoSuchElementException;
 
-/**
- * Caso de uso: criar um novo restaurante.
- * <p>
- * Valida apenas se o usuário dono existe. Validar tipo/perfil do usuário está
- * fora do escopo documentado para esta etapa.
- */
 @Component
 public class CriarRestauranteUseCase {
 

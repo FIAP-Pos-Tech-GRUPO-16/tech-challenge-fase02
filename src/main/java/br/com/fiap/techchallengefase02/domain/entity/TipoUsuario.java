@@ -8,10 +8,6 @@ import lombok.Setter;
 
 import java.util.UUID;
 
-/**
- * Entidade de domínio que representa o papel de um usuário no sistema
- * (ex: Cliente, Dono de Restaurante).
- */
 @Getter
 @Setter
 @Builder

@@ -4,10 +4,6 @@ import br.com.fiap.techchallengefase02.domain.entity.Restaurante;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Contrato de persistência de {@link Restaurante}. A implementação concreta
- * (JPA) vive em {@code infrastructure.persistence.restaurante}.
- */
 public interface RestauranteRepository {
 
     Restaurante salvar(Restaurante restaurante);

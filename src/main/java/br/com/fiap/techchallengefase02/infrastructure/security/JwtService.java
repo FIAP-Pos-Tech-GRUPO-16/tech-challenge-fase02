@@ -13,14 +13,6 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.util.Date;
 
-/**
- * Implementação de {@link GeradorDeToken} baseada em JWT (JJWT).
- *
- * A claim de tipo de usuário deixou de ser {@code userType} (enum, que não
- * existe mais) e passou a ser {@code tipoUsuarioId} (UUID como string),
- * refletindo a associação por ID entre Usuario e TipoUsuario. Autorização
- * por tipo/roles não faz parte deste escopo.
- */
 @Service
 public class JwtService implements GeradorDeToken {
 

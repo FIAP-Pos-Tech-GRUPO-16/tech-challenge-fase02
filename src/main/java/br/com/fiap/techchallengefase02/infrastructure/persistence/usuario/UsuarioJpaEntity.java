@@ -18,15 +18,6 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/**
- * Entidade JPA de Usuário. Persiste na tabela {@code users} (nome mantido
- * da Fase 1 — só os identificadores Java mudam para PT-BR, não o nome
- * físico da tabela/colunas legadas).
- *
- * A antiga herança JPA (Customer/RestaurantOwner com @Inheritance +
- * @DiscriminatorColumn) foi substituída por composição: o papel do
- * usuário agora é uma referência simples de ID para {@code tipos_usuario}.
- */
 @Entity
 @Table(name = "users")
 @Getter

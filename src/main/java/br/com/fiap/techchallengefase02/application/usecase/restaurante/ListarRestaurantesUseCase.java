@@ -7,9 +7,6 @@ import br.com.fiap.techchallengefase02.domain.repository.RestauranteRepository;
 import br.com.fiap.techchallengefase02.domain.repository.ResultadoPaginado;
 import org.springframework.stereotype.Component;
 
-/**
- * Caso de uso: listar os restaurantes cadastrados, de forma paginada.
- */
 @Component
 public class ListarRestaurantesUseCase {
 

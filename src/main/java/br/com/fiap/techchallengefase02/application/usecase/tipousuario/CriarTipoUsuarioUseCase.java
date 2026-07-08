@@ -7,12 +7,6 @@ import br.com.fiap.techchallengefase02.domain.exception.RecursoJaExistenteExcept
 import br.com.fiap.techchallengefase02.domain.repository.TipoUsuarioRepository;
 import org.springframework.stereotype.Component;
 
-/**
- * Caso de uso: criar um novo tipo de usuário.
- *
- * Valida que ainda não existe outro tipo de usuário com o mesmo nome antes
- * de persistir.
- */
 @Component
 public class CriarTipoUsuarioUseCase {
 

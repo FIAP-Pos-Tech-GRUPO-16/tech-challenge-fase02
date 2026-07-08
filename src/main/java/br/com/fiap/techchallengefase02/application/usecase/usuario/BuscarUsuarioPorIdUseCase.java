@@ -8,9 +8,6 @@ import org.springframework.stereotype.Component;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-/**
- * Caso de uso: buscar um usuário pelo seu ID.
- */
 @Component
 public class BuscarUsuarioPorIdUseCase {
 
