@@ -29,7 +29,7 @@ public record CriarUsuarioRequest(
 
         @NotBlank(message = "Senha é obrigatória")
         @Size(min = 6, max = 255)
-        @Schema(example = "123456")
+        @Schema(type = "string", example = "123456")
         String senha,
 
         @Valid

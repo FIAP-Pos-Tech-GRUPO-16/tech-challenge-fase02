@@ -14,12 +14,12 @@ public record AlterarSenhaRequest(
 
         @NotBlank(message = "Senha atual é obrigatória")
         @Size(min = 6, max = 255)
-        @Schema(example = "123456")
+        @Schema(type = "string", example = "123456")
         String senhaAtual,
 
         @NotBlank(message = "Nova senha é obrigatória")
         @Size(min = 6, max = 255)
-        @Schema(example = "123456")
+        @Schema(type = "string", example = "123456")
         String novaSenha
 ) {
 }

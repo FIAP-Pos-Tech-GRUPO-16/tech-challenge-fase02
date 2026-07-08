@@ -16,7 +16,7 @@ public record EnderecoDTO(
 
         @NotBlank(message = "Número é obrigatório")
         @Pattern(regexp = "\\d{1,20}", message = "O número deve conter apenas dígitos (máx. 20)")
-        @Schema(example = "123")
+        @Schema(type = "string", example = "123")
         String numero,
 
         @NotBlank(message = "Cidade é obrigatória")
