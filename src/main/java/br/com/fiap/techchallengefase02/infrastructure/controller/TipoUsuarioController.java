@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +29,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/tipos-usuario")
+@RequestMapping(value = "/v1/tipos-usuario", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Tipos de Usuário", description = "Gerenciamento de tipos de usuário")
 @SecurityRequirement(name = "bearerAuth")
 public class TipoUsuarioController {
