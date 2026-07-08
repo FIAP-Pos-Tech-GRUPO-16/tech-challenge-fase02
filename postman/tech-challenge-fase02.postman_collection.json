@@ -1,0 +1,503 @@
+{
+  "info": {
+    "name": "Tech Challenge Fase 02 - Gestão de Restaurantes",
+    "description": "Coleção completa da API de gestão de restaurantes (FIAP/POSTECH - Fase 2).\n\nCobre Autenticação, Tipos de Usuário, Usuários, Restaurantes e Itens de Cardápio.\n\n## Como usar\n1. Suba a aplicação (via `docker compose -f docker/docker-compose.yaml up --build` ou rodando local na porta 8080).\n2. Ajuste a variável de coleção `baseUrl` se necessário (padrão `http://localhost:8080`).\n3. Rode a pasta **0. Autenticação** primeiro: ela cria um usuário e faz login, salvando o token JWT na variável `{{token}}` usada por todas as demais requisições.\n4. As variáveis `tipoClienteId` e `tipoDonoId` já vêm preenchidas com os tipos semeados pelo Flyway em um banco novo.\n\n## Execução completa (Collection Runner)\nA coleção foi ordenada para rodar de ponta a ponta sem conflitos: todos os cadastros acontecem primeiro e as exclusões ficam na pasta **6. Limpeza**, na ordem correta de dependências (item -> restaurante -> usuários -> tipo de usuário). Cada requisição captura os IDs necessários em variáveis de coleção e valida o status HTTP esperado via scripts de teste.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{token}}", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "tipoClienteId", "value": "11111111-1111-1111-1111-111111111111", "type": "string" },
+    { "key": "tipoDonoId", "value": "22222222-2222-2222-2222-222222222222", "type": "string" },
+    { "key": "loginDono", "value": "", "type": "string" },
+    { "key": "emailDono", "value": "", "type": "string" },
+    { "key": "senha", "value": "123456", "type": "string" },
+    { "key": "donoId", "value": "", "type": "string" },
+    { "key": "loginDemo", "value": "", "type": "string" },
+    { "key": "emailDemo", "value": "", "type": "string" },
+    { "key": "usuarioDemoId", "value": "", "type": "string" },
+    { "key": "tipoUsuarioId", "value": "", "type": "string" },
+    { "key": "restauranteId", "value": "", "type": "string" },
+    { "key": "itemId", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "0. Autenticação",
+      "description": "Cria um usuário (endpoint público) e realiza o login para obter o token JWT. O usuário criado aqui será usado como dono do restaurante mais adiante.",
+      "item": [
+        {
+          "name": "1. Criar usuário para login (público)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const ts = Date.now();",
+                  "pm.collectionVariables.set('loginDono', 'dono' + ts);",
+                  "pm.collectionVariables.set('emailDono', 'dono' + ts + '@email.com');",
+                  "pm.collectionVariables.set('senha', '123456');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 - usuário criado', () => pm.response.to.have.status(201));",
+                  "const data = pm.response.json().data;",
+                  "pm.collectionVariables.set('donoId', data.id);",
+                  "pm.test('Retornou id', () => pm.expect(data.id).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Dono Restaurante\",\n  \"email\": \"{{emailDono}}\",\n  \"login\": \"{{loginDono}}\",\n  \"senha\": \"{{senha}}\",\n  \"endereco\": {\n    \"rua\": \"Rua Gourmet\",\n    \"numero\": \"45\",\n    \"cidade\": \"São Paulo\",\n    \"cep\": \"01310100\"\n  },\n  \"tipoUsuarioId\": \"{{tipoClienteId}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/v1/usuarios", "host": ["{{baseUrl}}"], "path": ["v1", "usuarios"] }
+          }
+        },
+        {
+          "name": "2. Login (obter token JWT)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 - autenticado', () => pm.response.to.have.status(200));",
+                  "const token = pm.response.json().data.token;",
+                  "pm.collectionVariables.set('token', token);",
+                  "pm.test('Token JWT retornado', () => pm.expect(token).to.be.a('string').and.not.empty);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"{{loginDono}}\",\n  \"senha\": \"{{senha}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/v1/autenticacao/login", "host": ["{{baseUrl}}"], "path": ["v1", "autenticacao", "login"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. Tipos de Usuário",
+      "description": "CRUD de tipos de usuário. Requer token (rode a pasta Autenticação primeiro).",
+      "item": [
+        {
+          "name": "Criar tipo de usuário",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": { "type": "text/javascript", "exec": ["pm.collectionVariables.set('nomeTipo', 'Gerente-' + Date.now());"] }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('tipoUsuarioId', pm.response.json().data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"{{nomeTipo}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/v1/tipos-usuario", "host": ["{{baseUrl}}"], "path": ["v1", "tipos-usuario"] }
+          }
+        },
+        {
+          "name": "Listar tipos de usuário (paginado)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));", "pm.test('data é lista', () => pm.expect(pm.response.json().data).to.be.an('array'));"] } }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/tipos-usuario?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "tipos-usuario"],
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }]
+            }
+          }
+        },
+        {
+          "name": "Buscar tipo de usuário por ID",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/v1/tipos-usuario/{{tipoUsuarioId}}", "host": ["{{baseUrl}}"], "path": ["v1", "tipos-usuario", "{{tipoUsuarioId}}"] }
+          }
+        },
+        {
+          "name": "Atualizar tipo de usuário",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": { "type": "text/javascript", "exec": ["pm.collectionVariables.set('nomeTipoAtualizado', 'Supervisor-' + Date.now());"] }
+            },
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"{{nomeTipoAtualizado}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/v1/tipos-usuario/{{tipoUsuarioId}}", "host": ["{{baseUrl}}"], "path": ["v1", "tipos-usuario", "{{tipoUsuarioId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Usuários",
+      "description": "CRUD de usuários, troca de senha e associação de tipo de usuário. A criação de usuário é pública; as demais operações exigem token.",
+      "item": [
+        {
+          "name": "Criar usuário (demonstração)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const ts = Date.now();",
+                  "pm.collectionVariables.set('loginDemo', 'cliente' + ts);",
+                  "pm.collectionVariables.set('emailDemo', 'cliente' + ts + '@email.com');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('usuarioDemoId', pm.response.json().data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Cliente Demonstração\",\n  \"email\": \"{{emailDemo}}\",\n  \"login\": \"{{loginDemo}}\",\n  \"senha\": \"{{senha}}\",\n  \"endereco\": {\n    \"rua\": \"Rua das Flores\",\n    \"numero\": \"123\",\n    \"cidade\": \"São Paulo\",\n    \"cep\": \"01310100\"\n  },\n  \"tipoUsuarioId\": \"{{tipoClienteId}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/v1/usuarios", "host": ["{{baseUrl}}"], "path": ["v1", "usuarios"] }
+          }
+        },
+        {
+          "name": "Buscar usuário por ID",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/v1/usuarios/{{usuarioDemoId}}", "host": ["{{baseUrl}}"], "path": ["v1", "usuarios", "{{usuarioDemoId}}"] }
+          }
+        },
+        {
+          "name": "Buscar usuários por nome (paginado)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/usuarios?nome=Cliente&page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "usuarios"],
+              "query": [{ "key": "nome", "value": "Cliente" }, { "key": "page", "value": "0" }, { "key": "size", "value": "10" }]
+            }
+          }
+        },
+        {
+          "name": "Atualizar usuário (parcial)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Cliente Nome Atualizado\"\n}" },
+            "url": { "raw": "{{baseUrl}}/v1/usuarios/{{usuarioDemoId}}", "host": ["{{baseUrl}}"], "path": ["v1", "usuarios", "{{usuarioDemoId}}"] }
+          }
+        },
+        {
+          "name": "Associar tipo de usuário",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));", "pm.test('tipo associado', () => pm.expect(pm.response.json().data.tipoUsuarioId).to.eql(pm.collectionVariables.get('tipoUsuarioId')));"] } }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tipoUsuarioId\": \"{{tipoUsuarioId}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/v1/usuarios/{{usuarioDemoId}}/tipo-usuario", "host": ["{{baseUrl}}"], "path": ["v1", "usuarios", "{{usuarioDemoId}}", "tipo-usuario"] }
+          }
+        },
+        {
+          "name": "Trocar senha",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"login\": \"{{loginDemo}}\",\n  \"senhaAtual\": \"{{senha}}\",\n  \"novaSenha\": \"novaSenha123\"\n}" },
+            "url": { "raw": "{{baseUrl}}/v1/usuarios/{{usuarioDemoId}}/senha", "host": ["{{baseUrl}}"], "path": ["v1", "usuarios", "{{usuarioDemoId}}", "senha"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Restaurantes",
+      "description": "CRUD de restaurantes. O dono é o usuário criado na pasta Autenticação ({{donoId}}).",
+      "item": [
+        {
+          "name": "Criar restaurante",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": { "type": "text/javascript", "exec": ["pm.collectionVariables.set('nomeRestaurante', 'Cantina-' + Date.now());"] }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('restauranteId', pm.response.json().data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"{{nomeRestaurante}}\",\n  \"endereco\": {\n    \"rua\": \"Rua Gourmet\",\n    \"numero\": \"45\",\n    \"cidade\": \"São Paulo\",\n    \"cep\": \"01310100\"\n  },\n  \"tipoCozinha\": \"Italiana\",\n  \"horarioFuncionamento\": \"Segunda a sexta, das 11h às 22h\",\n  \"donoId\": \"{{donoId}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/v1/restaurantes", "host": ["{{baseUrl}}"], "path": ["v1", "restaurantes"] }
+          }
+        },
+        {
+          "name": "Listar restaurantes (paginado)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/restaurantes?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "restaurantes"],
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }]
+            }
+          }
+        },
+        {
+          "name": "Buscar restaurante por ID",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/v1/restaurantes/{{restauranteId}}", "host": ["{{baseUrl}}"], "path": ["v1", "restaurantes", "{{restauranteId}}"] }
+          }
+        },
+        {
+          "name": "Atualizar restaurante",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": { "type": "text/javascript", "exec": ["pm.collectionVariables.set('nomeRestauranteAtualizado', 'Trattoria-' + Date.now());"] }
+            },
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"{{nomeRestauranteAtualizado}}\",\n  \"endereco\": {\n    \"rua\": \"Rua Nova\",\n    \"numero\": \"99\",\n    \"cidade\": \"São Paulo\",\n    \"cep\": \"04567000\"\n  },\n  \"tipoCozinha\": \"Mediterrânea\",\n  \"horarioFuncionamento\": \"Todos os dias, das 12h às 23h\",\n  \"donoId\": \"{{donoId}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/v1/restaurantes/{{restauranteId}}", "host": ["{{baseUrl}}"], "path": ["v1", "restaurantes", "{{restauranteId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Itens de Cardápio",
+      "description": "CRUD de itens de cardápio vinculados ao restaurante criado ({{restauranteId}}).",
+      "item": [
+        {
+          "name": "Criar item de cardápio",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": { "type": "text/javascript", "exec": ["pm.collectionVariables.set('nomeItem', 'Lasanha-' + Date.now());"] }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('itemId', pm.response.json().data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"{{nomeItem}}\",\n  \"descricao\": \"Massa fresca com molho bolonhesa e queijo gratinado\",\n  \"preco\": 49.90,\n  \"disponivelApenasNoLocal\": false,\n  \"caminhoFoto\": \"/imagens/cardapio/lasanha.jpg\",\n  \"restauranteId\": \"{{restauranteId}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/v1/itens-cardapio", "host": ["{{baseUrl}}"], "path": ["v1", "itens-cardapio"] }
+          }
+        },
+        {
+          "name": "Listar itens por restaurante (paginado)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/itens-cardapio?restauranteId={{restauranteId}}&page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "itens-cardapio"],
+              "query": [{ "key": "restauranteId", "value": "{{restauranteId}}" }, { "key": "page", "value": "0" }, { "key": "size", "value": "10" }]
+            }
+          }
+        },
+        {
+          "name": "Buscar item por ID",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/v1/itens-cardapio/{{itemId}}", "host": ["{{baseUrl}}"], "path": ["v1", "itens-cardapio", "{{itemId}}"] }
+          }
+        },
+        {
+          "name": "Atualizar item de cardápio",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": { "type": "text/javascript", "exec": ["pm.collectionVariables.set('nomeItemAtualizado', 'Ravioli-' + Date.now());"] }
+            },
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"{{nomeItemAtualizado}}\",\n  \"descricao\": \"Ravioli de queijo com manteiga e sálvia\",\n  \"preco\": 59.90,\n  \"disponivelApenasNoLocal\": true,\n  \"caminhoFoto\": \"/imagens/cardapio/ravioli.jpg\",\n  \"restauranteId\": \"{{restauranteId}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/v1/itens-cardapio/{{itemId}}", "host": ["{{baseUrl}}"], "path": ["v1", "itens-cardapio", "{{itemId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Limpeza (exclusões)",
+      "description": "Exclui os recursos criados durante a execução, na ordem correta de dependências (item -> restaurante -> usuários -> tipo de usuário). Permite rodar a coleção inteira repetidamente sem deixar resíduos.",
+      "item": [
+        {
+          "name": "Excluir item de cardápio",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 204', () => pm.response.to.have.status(204));"] } }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/v1/itens-cardapio/{{itemId}}", "host": ["{{baseUrl}}"], "path": ["v1", "itens-cardapio", "{{itemId}}"] }
+          }
+        },
+        {
+          "name": "Excluir restaurante",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 204', () => pm.response.to.have.status(204));"] } }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/v1/restaurantes/{{restauranteId}}", "host": ["{{baseUrl}}"], "path": ["v1", "restaurantes", "{{restauranteId}}"] }
+          }
+        },
+        {
+          "name": "Excluir usuário (demonstração)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 204', () => pm.response.to.have.status(204));"] } }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/v1/usuarios/{{usuarioDemoId}}", "host": ["{{baseUrl}}"], "path": ["v1", "usuarios", "{{usuarioDemoId}}"] }
+          }
+        },
+        {
+          "name": "Excluir usuário (dono/login)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 204', () => pm.response.to.have.status(204));"] } }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/v1/usuarios/{{donoId}}", "host": ["{{baseUrl}}"], "path": ["v1", "usuarios", "{{donoId}}"] }
+          }
+        },
+        {
+          "name": "Excluir tipo de usuário",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 204', () => pm.response.to.have.status(204));"] } }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/v1/tipos-usuario/{{tipoUsuarioId}}", "host": ["{{baseUrl}}"], "path": ["v1", "tipos-usuario", "{{tipoUsuarioId}}"] }
+          }
+        }
+      ]
+    }
+  ]
+}
