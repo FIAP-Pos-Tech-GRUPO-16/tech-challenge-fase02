@@ -1,5 +1,3 @@
-version: "3.9"
-
 name: tech-challenge-fase02
 
 services:
