@@ -31,6 +31,7 @@ Nesta segunda fase, o projeto evoluiu para suportar múltiplos domínios da apli
 - SpringDoc OpenAPI
 - Maven
 - H2 Database (testes)
+- JaCoCo
 
 ---
 
@@ -197,7 +198,7 @@ Executar todos os testes
 mvn test
 ```
 
-Gerar cobertura
+Gerar relatório de cobertura do JaCoCo
 
 ```bash
 mvn test jacoco:report
